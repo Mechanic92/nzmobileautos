@@ -1,0 +1,454 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Footer from "./Footer";
+import Header from "./Header";
+import { Award, CheckCircle, Clock, MapPin, Phone, Shield, Star, Wrench } from "lucide-react";
+import { Link } from "wouter";
+import { COMPANY_INFO } from "@/const";
+import Seo from "./Seo";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+// Professional mobile mechanic hero image
+const heroImageUrl = "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&q=80&w=2000";
+
+export default function Home() {
+  const mechanicDeskBookingUrl = (import.meta as any).env?.VITE_MECHANICDESK_BOOKING_URL as string | undefined;
+
+  const benefits = [
+    {
+      icon: Clock,
+      title: "Saves You Time",
+      description: "No workshop visits. We come to your home or workplace.",
+    },
+    {
+      icon: Shield,
+      title: "Honest & Transparent",
+      description: "Clear communication, no hidden fees.",
+    },
+    {
+      icon: Award,
+      title: "Quality Workmanship",
+      description: "Experienced mechanics using quality parts and tools.",
+    },
+    {
+      icon: Phone,
+      title: "Always Available",
+      description: "Quick response times and flexible scheduling.",
+    },
+  ];
+
+  const services = [
+    {
+      icon: Wrench,
+      title: "General Servicing",
+      description: "Bronze, Silver, and Gold service packages tailored to your needs.",
+    },
+    {
+      icon: CheckCircle,
+      title: "Pre-Purchase Inspections",
+      description: "Comprehensive vehicle assessments before you buy.",
+    },
+    {
+      icon: Shield,
+      title: "WOF Remedial Repairs",
+      description: "Post-inspection remedial work to get your vehicle WOF-ready (no WOF inspections carried out).",
+    },
+    {
+      icon: Wrench,
+      title: "Diagnostics & Repairs",
+      description: "From brake work to engine diagnostics, we handle it all.",
+    },
+  ];
+
+  const faqs = [
+    {
+      q: "Which areas of Auckland do you cover?",
+      a: "We are based in West Auckland and primarily service Massey, Te Atatu, Henderson, Hobsonville, West Harbour, Kumeu, and surrounding areas. For larger jobs, we can travel further across Auckland."
+    },
+    {
+      q: "Do you carry out WOF inspections?",
+      a: "No, we do not perform the inspection itself. We specialize in 'WOF Remedial Repairs'—fixing the faults found during your official inspection so your vehicle can pass its re-check without you needing to leave home."
+    },
+    {
+      q: "How much does a mobile diagnostic scan cost?",
+      a: "Our flat rate for a mobile diagnostic scan and fault finding is $140. This includes professional tool connection, error code analysis, and a clear explanation of required repairs."
+    },
+    {
+      q: "Can you service my car while I'm at work?",
+      a: "Absolutely! As long as we have access to the vehicle and a relatively level space to work, we can complete most servicing and repairs while you're busy at the office or home."
+    }
+  ];
+
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.q,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.a
+      }
+    }))
+  };
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Mobile Autoworks NZ",
+    "image": heroImageUrl,
+    "@id": "https://www.mobileautoworksnz.com",
+    "url": "https://www.mobileautoworksnz.com",
+    "telephone": "027 642 1824",
+    "priceRange": "$$",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Mobile Service",
+      "addressLocality": "West Auckland",
+      "addressRegion": "Auckland",
+      "addressCountry": "NZ"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -36.8485,
+      "longitude": 174.6333
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+      ],
+      "opens": "08:00",
+      "closes": "18:00"
+    },
+    "areaServed": [
+      { "@type": "City", "name": "West Auckland" },
+      { "@type": "City", "name": "North Shore" }
+    ],
+    "description": "Professional mobile mechanic in Auckland providing diagnostics, servicing, and repairs at your home or workplace."
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Seo
+        title="Mobile Mechanic Auckland | Mobile Diagnostics Auckland"
+        description="Mobile mechanic Auckland. Mobile diagnostics Auckland, servicing and repairs across Central Auckland, West Auckland and the North Shore. Call or text 027 642 1824."
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
+      <Header />
+
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-black text-white">
+          <div className="absolute inset-0">
+            <img src={heroImageUrl} alt="Mobile mechanic" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-black/75" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/10" />
+          </div>
+
+          <div className="container relative py-20 md:py-28">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs text-white/80">
+                <MapPin className="h-4 w-4 text-primary" />
+                Mobile mechanic Auckland – Central Auckland, West Auckland, North Shore
+              </div>
+
+              <h1 className="mt-6 text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight">
+                Mobile Mechanic Auckland
+              </h1>
+
+              <p className="mt-4 text-xl md:text-2xl font-bold text-primary">Mobile Diagnostics Auckland</p>
+
+              <p className="mt-4 text-base md:text-lg text-white/85 max-w-2xl">
+                Mobile mechanic across Auckland. On-site diagnostics, servicing and repairs at your home or workplace.
+              </p>
+
+              <div className="mt-8 rounded-md border border-white/15 bg-white/5 p-5">
+                <div className="text-lg font-bold">Breakdown Assistance – Auckland</div>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-white/85">
+                  <div>1. No-start / flat battery</div>
+                  <div>2. Warning lights</div>
+                  <div>3. Stalling / running issues</div>
+                  <div>4. Roadside diagnostics</div>
+                </div>
+                <div className="mt-4 text-sm">
+                  For breakdown assistance, call or text{' '}
+                  <a href="tel:0276421824" className="font-bold underline">{COMPANY_INFO.phone}</a>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center uppercase tracking-wider">
+                {mechanicDeskBookingUrl ? (
+                  <Link href="/book">
+                    <a>
+                      <Button size="lg" className="text-base md:text-lg px-8 bg-accent hover:bg-accent/90 text-white font-bold rounded-none">
+                        Book diagnostics – booking request
+                      </Button>
+                    </a>
+                  </Link>
+                ) : (
+                  <a href="tel:0276421824">
+                    <Button size="lg" className="text-base md:text-lg px-8 bg-accent hover:bg-accent/90 text-white font-bold rounded-none">
+                      Call/text to request a booking
+                    </Button>
+                  </a>
+                )}
+                <Link href="/quote">
+                  <Button size="lg" variant="outline" className="text-base md:text-lg px-8 rounded-none">
+                    Quote request
+                  </Button>
+                </Link>
+                <a href="tel:0276421824" className="flex items-center gap-3 px-4 py-2 bg-white/5 hover:bg-white/10 transition-colors border border-white/20">
+                  <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
+                    <Phone className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-white/60">Call Chris directly</div>
+                    <div className="font-bold text-white leading-none">027 642 1824</div>
+                  </div>
+                </a>
+              </div>
+
+              <div className="mt-3 text-xs text-white/75 text-center sm:text-left">
+                Booking requests are reviewed and confirmed by the technician before anything is locked in.
+                <div className="mt-1">Or call/text 027 642 1824 for urgent jobs</div>
+              </div>
+
+              <div className="mt-12 flex flex-wrap gap-x-8 gap-y-4 text-xs font-bold opacity-80 uppercase tracking-widest">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary" />
+                  <span>Qualified Mechanic</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary" />
+                  <span>100% Mobile Service</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary" />
+                  <span>Guaranteed Workmanship</span>
+                </div>
+              </div>
+
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-white/75">
+                <div className="rounded-[10px] border border-white/10 bg-white/5 p-4">
+                  <div className="font-semibold text-white">Fast callouts</div>
+                  <div className="mt-1">We come to your home or workplace.</div>
+                </div>
+                <div className="rounded-[10px] border border-white/10 bg-white/5 p-4">
+                  <div className="font-semibold text-white">Clear communication</div>
+                  <div className="mt-1">No surprises, just honest advice.</div>
+                </div>
+                <div className="rounded-[10px] border border-white/10 bg-white/5 p-4">
+                  <div className="font-semibold text-white">Quality workmanship</div>
+                  <div className="mt-1">Experienced mechanics & tools.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Why Choose Us */}
+        <section className="py-16 md:py-24 bg-black text-white">
+          <div className="container">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Why Choose Mobile Autoworks NZ?
+              </h2>
+              <p className="text-lg text-white/70 max-w-2xl mx-auto">
+                Professional mobile mechanical services that come to you, saving time without compromising quality.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {benefits.map((benefit, index) => (
+                <Card
+                  key={index}
+                  className="text-center border-white/10 bg-[#0a0a0a] hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition-shadow"
+                >
+                  <CardHeader>
+                    <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center">
+                      <benefit.icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">{benefit.title}</CardTitle>
+                    <CardDescription className="text-white/70">{benefit.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Popular Services */}
+        <section className="py-16 md:py-24 bg-[#f5f5f5] text-black">
+          <div className="container">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Our Popular Services
+              </h2>
+              <p className="text-lg text-black/70 max-w-2xl mx-auto">
+                From routine maintenance to complex diagnostics, we bring professional automotive services to your location.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {services.map((service, index) => (
+                <Card key={index} className="bg-white border-black/10 hover:border-primary transition-colors shadow-sm">
+                  <CardContent className="pt-6">
+                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+                      <service.icon className="h-6 w-6 text-black" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">{service.title}</h3>
+                    <p className="text-sm text-black/70">{service.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <div className="text-center">
+              <Link href="/services">
+                <Button size="lg" className="px-10">View All Services</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section className="py-16 md:py-24 bg-black text-white">
+          <div className="container">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Auckland mobile mechanic, done properly</h2>
+              <p className="text-lg text-white/70 max-w-2xl mx-auto">
+                Clear communication, mobile diagnostics, and quality workmanship across Central Auckland, West Auckland and the North Shore.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  name: "David S.",
+                  location: "Hobsonville",
+                  text: "Chris is the only mechanic I trust with my European cars. He has the diagnostics tools that most mobile guys don't, and he actually explains the data. Exceptional service.",
+                },
+                {
+                  name: "Sarah L.",
+                  location: "Te Atatū Peninsula",
+                  text: "So much easier than dropping my car at a workshop. He fixed my WOF failure items in my own driveway while I worked from home. Professional, honest, and very reasonable.",
+                },
+                {
+                  name: "Mark T.",
+                  location: "Henderson",
+                  text: "Found a major issue during a pre-purchase inspection that saved me thousands. His report was thorough and he talk me through every detail. Cannot recommend enough.",
+                }
+              ].map((testimonial, i) => (
+                <Card key={i} className="border-white/10 bg-[#0a0a0a] hover:border-primary/50 transition-colors">
+                  <CardHeader>
+                    <div className="flex items-center gap-1 mb-2">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <Star key={j} className="h-4 w-4 fill-primary text-primary" />
+                      ))}
+                    </div>
+                    <CardTitle className="text-lg">{testimonial.name}</CardTitle>
+                    <CardDescription className="text-white/70">{testimonial.location}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-white/75 italic">"{testimonial.text}"</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Service Areas */}
+        <section className="py-16 md:py-24 bg-[#f5f5f5] text-black">
+          <div className="container">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Servicing Auckland
+              </h2>
+              <p className="text-lg text-black/70 max-w-2xl mx-auto">
+                Central Auckland, West Auckland and the North Shore.
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              {[
+                "Central Auckland",
+                "West Auckland",
+                "North Shore",
+              ].map((area) => (
+                <div key={area} className="">
+                  <Button
+                    variant="outline"
+                    className="h-10 rounded-full border-black/15 bg-white text-black hover:bg-black hover:text-white"
+                  >
+                    <MapPin className="mr-2 h-4 w-4 text-primary" />
+                    <span className="font-medium">{area}</span>
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="text-center">
+              <Link href="/areas">
+                <Button variant="outline" size="lg" className="border-black/20 text-black hover:bg-black hover:text-white">
+                  View Coverage Map
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-16 md:py-24 bg-white text-black">
+          <div className="container">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+              <p className="text-lg text-black/70 max-w-2xl mx-auto">
+                Everything you need to know about our mobile mechanical services.
+              </p>
+            </div>
+            <div className="max-w-3xl mx-auto">
+              <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq: { q: string; a: string }, i: number) => (
+                  <AccordionItem key={i} value={`item-${i}`}>
+                    <AccordionTrigger className="text-left font-semibold">{faq.q}</AccordionTrigger>
+                    <AccordionContent className="text-black/70 leading-relaxed">
+                      {faq.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="py-16 md:py-24 bg-black text-white">
+          <div className="container">
+            <div className="text-center max-w-3xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold">Ready to get it sorted?</h2>
+              <p className="mt-4 text-lg text-white/70">
+                Tell us what's going on and we'll confirm scope before any major work.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/quote">
+                  <Button size="lg" className="text-lg px-10">Quote request</Button>
+                </Link>
+                <a href="tel:0276421824">
+                  <Button size="lg" variant="outline" className="text-lg px-10">
+                    <Phone className="mr-2 h-5 w-5" />
+                    Call Now
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}

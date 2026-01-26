@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+node_modules
+**/node_modules/
+**/node_modules/**
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.vite/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Drizzle
+drizzle/meta/
+
+# Netlify
+.netlify/
+.vercel/
+.env*.local

@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(1200px 600px at 20% 0%, rgba(246, 201, 14, 0.14), transparent 55%),
+    radial-gradient(900px 500px at 80% 10%, rgba(59, 130, 246, 0.12), transparent 60%),
+    #070707;
+  color: #fafafa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  @apply mx-auto w-full max-w-6xl px-4;
+}
+
+a {
+  @apply underline-offset-4;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(246, 201, 14, 0.85);
+  outline-offset: 2px;
+}
+
+/* Mobile UX: safe area padding for iOS notch/home indicator */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .container {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Ensure form buttons stay visible above mobile keyboard */
+@media (max-width: 640px) {
+  form button[type="submit"] {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 10;
+  }
+}
+
+/* Scroll margin for anchor links to account for sticky header */
+[id] {
+  scroll-margin-top: 5rem;
+}
