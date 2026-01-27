@@ -9,7 +9,6 @@ import Seo from "./Seo";
 import SelfDiagnosis from "@/components/SelfDiagnosis";
 
 export default function Services() {
-  const mechanicDeskBookingUrl = (import.meta as any).env?.VITE_MECHANICDESK_BOOKING_URL as string | undefined;
   const serviceDetailPages = [
     {
       title: "Mobile Diagnostics",
@@ -263,13 +262,11 @@ export default function Services() {
               <Link href="/quote">
                 <Button size="lg" className="text-base md:text-lg px-10">Quote request</Button>
               </Link>
-              {mechanicDeskBookingUrl ? (
-                <Link href="/book">
-                  <a className="inline-flex justify-center">
-                    <Button size="lg" variant="outline" className="text-base md:text-lg px-10">Booking request (subject to confirmation)</Button>
-                  </a>
-                </Link>
-              ) : null}
+              <Link href="/booking">
+                <a className="inline-flex justify-center">
+                  <Button size="lg" variant="outline" className="text-base md:text-lg px-10">Book Online (Instant Confirmation)</Button>
+                </a>
+              </Link>
               <a href="tel:0276421824" className="inline-flex justify-center">
                 <Button size="lg" variant="outline" className="text-base md:text-lg px-10">
                   Call Now
@@ -497,15 +494,11 @@ export default function Services() {
                     <p className="text-muted-foreground mb-4">
                       {service.description}
                     </p>
-                    {mechanicDeskBookingUrl ? (
-                      <a href={mechanicDeskBookingUrl} target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline">Booking request</Button>
+                    <Link href="/booking">
+                      <a>
+                        <Button variant="outline">Book Now</Button>
                       </a>
-                    ) : (
-                      <a href="tel:0276421824">
-                        <Button variant="outline">Call to book</Button>
-                      </a>
-                    )}
+                    </Link>
                   </CardContent>
                 </Card>
               ))}

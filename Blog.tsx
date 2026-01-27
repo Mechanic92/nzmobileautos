@@ -131,9 +131,11 @@ export default function Blog() {
               Get in touch with Mobile Autoworks NZ for mobile diagnostics, repairs, and WOF remedial work across West Auckland.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href={appPortalUrl("/book/quote")}>
-                <Button size="lg">Get a Quote</Button>
-              </a>
+              <Link href="/quote">
+                <a>
+                  <Button size="lg">Get a Quote</Button>
+                </a>
+              </Link>
               <a href="tel:0276421824">
                 <Button size="lg" variant="outline">
                   Call 027 642 1824

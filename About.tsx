@@ -196,11 +196,13 @@ export default function About() {
               Get in touch today for professional mobile mechanical services you can trust.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href={appPortalUrl("/book/quote")}>
-                <Button size="lg" variant="secondary" className="text-lg px-8">
-                  Get a Quote
-                </Button>
-              </a>
+              <Link href="/quote">
+                <a>
+                  <Button size="lg" variant="secondary" className="text-lg px-8">
+                    Get a Quote
+                  </Button>
+                </a>
+              </Link>
               <a href="tel:0276421824">
                 <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
                   Call 027 642 1824

@@ -22,7 +22,7 @@ export default function Cancel() {
                             No charge has been made to your card. You can try booking again whenever you're ready.
                         </p>
                         <div className="space-y-3">
-                            <Button onClick={() => setLocation("/book")} size="lg" className="w-full">
+                            <Button onClick={() => setLocation("/booking")} size="lg" className="w-full">
                                 Return to Booking
                             </Button>
                             <Button

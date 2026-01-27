@@ -20,9 +20,20 @@ export default function Success() {
         }
     }, []);
 
-    const { data, isLoading, error } = trpc.confirmation.confirm.useQuery(
+    const { data, isLoading, error, refetch } = trpc.confirmation.confirm.useQuery(
         { sessionId },
-        { enabled: !!sessionId, retry: false }
+        { 
+            enabled: !!sessionId, 
+            retry: 3,
+            refetchInterval: (query) => {
+                // Poll if payment is not yet confirmed or hasn't finished loading
+                const result = query.state.data as any;
+                if (!result || !result.success) {
+                    return 5000; // Poll every 5 seconds
+                }
+                return false;
+            }
+        }
     );
 
     if (!sessionId) {
@@ -37,7 +48,7 @@ export default function Success() {
                             <p className="text-muted-foreground mb-6">
                                 No payment session found. Please try booking again.
                             </p>
-                            <Button onClick={() => setLocation("/book")}>Return to Booking</Button>
+                            <Button onClick={() => setLocation("/booking")}>Return to Booking</Button>
                         </CardContent>
                     </Card>
                 </main>

@@ -403,3 +403,90 @@ export async function sendAdminBookingConfirmation(data: BookingConfirmationEmai
     return false;
   }
 }
+
+export async function sendCustomerBookingConfirmation(data: BookingConfirmationEmailData): Promise<boolean> {
+  if (!resend) return false;
+
+  try {
+    const subject = `Booking Confirmed – ${data.serviceType} – ${data.bookingRef}`;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #1e293b; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; border: 1px solid #e5e7eb; border-top: none; }
+    .section { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #f3f4f6; }
+    .highlight { background: #f0fdf4; border-radius: 8px; padding: 15px; border: 1px solid #dcfce7; }
+    h2 { color: #1e293b; font-size: 1.25rem; margin-top: 0; }
+    .footer { font-size: 0.875rem; color: #6b7280; text-align: center; margin-top: 30px; }
+    ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Booking Confirmed!</h1>
+      <p>Reference: <strong>${data.bookingRef}</strong></p>
+    </div>
+    <div class="content">
+      <p>Hi ${data.customerName},</p>
+      <p>Thank you for choosing Mobile Autoworks NZ. We’ve received your payment and your booking is confirmed.</p>
+      
+      <div class="highlight section">
+        <h2>Appointment Details</h2>
+        <p><strong>Service:</strong> ${data.serviceType}</p>
+        <p><strong>Date:</strong> ${data.appointmentDate}</p>
+        <p><strong>Time:</strong> ${data.appointmentTime}</p>
+        <p><strong>Location:</strong> ${data.address}, ${data.suburb}</p>
+      </div>
+
+      <div class="section">
+        <h2>🚗 Preparation Checklist</h2>
+        <p>To ensure we can complete the job efficiently, please ensure:</p>
+        <ul>
+          <li>The vehicle is parked on reasonably flat, solid ground.</li>
+          <li>There is at least 1 meter of space around the vehicle.</li>
+          <li>The keys are available at the scheduled time.</li>
+          <li>Pets and children are kept clear of the work area for safety.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>📜 Cancellation Policy</h2>
+        <p>We understand plans change. Here is our policy:</p>
+        <ul>
+          <li><strong>48+ hours notice:</strong> Full refund or free rescheduling.</li>
+          <li><strong>24-48 hours notice:</strong> 50% refund or $50 rescheduling fee.</li>
+          <li><strong>Less than 24 hours:</strong> No refund (call-out costs covered).</li>
+        </ul>
+      </div>
+
+      <p>If you need to make changes, please reply to this email or call us at <strong>027 642 1824</strong>.</p>
+      
+      <div class="footer">
+        <p>© ${new Date().getFullYear()} Mobile Autoworks NZ. All rights reserved.</p>
+        <p>Mobile Mechanical Specialists · West Auckland</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+    `.trim();
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: data.email,
+      subject,
+      html,
+    });
+
+    return true;
+  } catch (error: any) {
+    console.error("[Email] Failed to send customer confirmation:", error.message);
+    return false;
+  }
+}

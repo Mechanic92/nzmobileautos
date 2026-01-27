@@ -44,7 +44,10 @@ export default function BookingSuccess() {
       return;
     }
 
-    // Fetch booking details
+    // Fetch booking details with polling
+    let attempts = 0;
+    const maxAttempts = 10;
+    
     const fetchBooking = async () => {
       try {
         const response = await fetch(`/api/trpc/prepaidBooking.getByRef?input=${encodeURIComponent(JSON.stringify({ bookingRef, sessionId }))}`);
@@ -52,15 +55,35 @@ export default function BookingSuccess() {
         
         if (data.result?.data?.found) {
           setBooking(data.result.data);
+          setLoading(false);
+          return true; // Found
         }
+        return false; // Not found yet
       } catch (error) {
         console.error('Failed to fetch booking:', error);
-      } finally {
-        setLoading(false);
+        return false;
       }
     };
 
-    fetchBooking();
+    const intervalId = setInterval(async () => {
+      const found = await fetchBooking();
+      attempts++;
+      
+      if (found || attempts >= maxAttempts) {
+        clearInterval(intervalId);
+        setLoading(false);
+      }
+    }, 3000); // Poll every 3 seconds
+
+    // Initial fetch
+    fetchBooking().then(found => {
+      if (found) {
+        clearInterval(intervalId);
+        setLoading(false);
+      }
+    });
+
+    return () => clearInterval(intervalId);
   }, [navigate]);
 
   const getServiceName = (type: string) => {

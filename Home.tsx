@@ -12,7 +12,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 const heroImageUrl = "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&q=80&w=2000";
 
 export default function Home() {
-  const mechanicDeskBookingUrl = (import.meta as any).env?.VITE_MECHANICDESK_BOOKING_URL as string | undefined;
 
   const benefits = [
     {
@@ -185,21 +184,13 @@ export default function Home() {
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center uppercase tracking-wider">
-                {mechanicDeskBookingUrl ? (
-                  <Link href="/book">
-                    <a>
-                      <Button size="lg" className="text-base md:text-lg px-8 bg-accent hover:bg-accent/90 text-white font-bold rounded-none">
-                        Book diagnostics – booking request
-                      </Button>
-                    </a>
-                  </Link>
-                ) : (
-                  <a href="tel:0276421824">
+                <Link href="/booking">
+                  <a>
                     <Button size="lg" className="text-base md:text-lg px-8 bg-accent hover:bg-accent/90 text-white font-bold rounded-none">
-                      Call/text to request a booking
+                      Book Online (Instant Confirmation)
                     </Button>
                   </a>
-                )}
+                </Link>
                 <Link href="/quote">
                   <Button size="lg" variant="outline" className="text-base md:text-lg px-8 rounded-none">
                     Quote request

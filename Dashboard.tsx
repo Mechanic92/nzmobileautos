@@ -150,7 +150,7 @@ export default function Dashboard() {
                 <CardContent className="text-center py-12">
                   <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-4">No upcoming bookings</p>
-                  <Button onClick={() => window.location.href = "/book"}>Book a Service</Button>
+                  <Button onClick={() => window.location.href = "/booking"}>Book a Service</Button>
                 </CardContent>
               </Card>
             )}

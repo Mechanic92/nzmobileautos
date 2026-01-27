@@ -16,7 +16,11 @@ import {
   getNextAvailableDate,
   getFormattedBusinessHours,
   BUSINESS_HOURS_CONFIG,
+  toNZDate,
 } from '../utils/business-hours';
+import { getDb } from '../../db';
+import { bookings } from '../../schema';
+import { eq, and, between, count, not } from 'drizzle-orm';
 import {
   SERVICES,
   ADD_ONS,
@@ -152,14 +156,36 @@ export const prepaidBookingRouter = router({
         };
       }
 
-      // TODO: Get actual booking count from database
-      const existingBookingsCount = 0;
+      // Get actual booking count from database
+      const db = await getDb();
+      let existingBookingsCount = 0;
+      
+      if (db) {
+        const startOfDay = new Date(input.date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(input.date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const results = await db
+          .select({ value: count() })
+          .from(bookings)
+          .where(
+            and(
+              between(bookings.appointmentDate, startOfDay, endOfDay),
+              not(eq(bookings.status, 'cancelled'))
+            )
+          );
+        existingBookingsCount = Number(results[0]?.value || 0);
+      }
+
       const slots = getAvailableTimeSlots(date, existingBookingsCount);
 
       return {
         isWeekend: false,
         slots,
-        message: null,
+        message: existingBookingsCount >= BUSINESS_HOURS_CONFIG.maxBookingsPerDay 
+          ? 'Fully booked for this day. Please select another date.' 
+          : null,
       };
     }),
 
@@ -282,6 +308,37 @@ export const prepaidBookingRouter = router({
         });
       }
 
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database connection failed. Please try again later.',
+        });
+      }
+
+      // Check capacity again (server-side)
+      const startOfDay = new Date(input.preferredDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(input.preferredDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const capacityCheck = await db
+        .select({ value: count() })
+        .from(bookings)
+        .where(
+          and(
+            between(bookings.appointmentDate, startOfDay, endOfDay),
+            not(eq(bookings.status, 'cancelled'))
+          )
+        );
+
+      if (Number(capacityCheck[0]?.value || 0) >= BUSINESS_HOURS_CONFIG.maxBookingsPerDay && !isWeekendBooking) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Sorry, this date has reached its maximum booking capacity. Please choose another date.',
+        });
+      }
+
       // Calculate total
       const pricing = calculateBookingTotal(
         input.serviceType as ServiceType,
@@ -294,6 +351,44 @@ export const prepaidBookingRouter = router({
       // Determine booking status
       const requiresApproval = isWeekendBooking || hasAddOnsRequiringApproval(input.addOns as AddOnType[]);
       const initialStatus: BookingStatus = requiresApproval ? 'pending_weekend_approval' : 'pending';
+
+      // Create pending booking record in database
+      let dbBookingId: number | undefined;
+      try {
+        const appointmentDate = new Date(input.preferredDate);
+        // Combine date and time
+        if (input.preferredTime) {
+          const [hours, minutes] = input.preferredTime.split(':').map(Number);
+          appointmentDate.setHours(hours, minutes, 0, 0);
+        }
+
+        const [insertResult] = await db.insert(bookings).values({
+          customerName: input.customerName,
+          email: input.email,
+          phone: input.phone,
+          address: input.address,
+          suburb: 'Auckland', // Default or extracted
+          vehicleRego: input.vehicleRego.toUpperCase(),
+          vehicleMake: 'Lookup Pending',
+          vehicleModel: 'Lookup Pending',
+          vehicleYear: 0,
+          serviceType: input.serviceType,
+          appointmentDate,
+          appointmentTime: input.preferredTime,
+          notes: input.notes,
+          status: 'pending', // Always start as pending until paid
+          paymentStatus: 'pending',
+          adminNotes: `Booking Ref: ${bookingRef}`,
+        });
+        
+        dbBookingId = (insertResult as any).insertId;
+      } catch (dbError: any) {
+        console.error('[Database] Failed to create pending booking:', dbError);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to initialize booking record. Please try again.',
+        });
+      }
 
       // Check Stripe availability
       if (!stripe) {
@@ -309,7 +404,9 @@ export const prepaidBookingRouter = router({
       // Create Stripe Checkout Session with all payment methods
       try {
         const session = await stripe.checkout.sessions.create({
-          payment_method_types: ['card'],
+          automatic_payment_methods: {
+            enabled: true,
+          },
           mode: 'payment',
           customer_email: input.email,
           
@@ -340,6 +437,7 @@ export const prepaidBookingRouter = router({
 
           // Store all booking data in metadata
           metadata: {
+            bookingId: dbBookingId?.toString() || '',
             bookingRef,
             serviceType: input.serviceType,
             customerName: input.customerName,

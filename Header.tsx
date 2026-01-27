@@ -56,10 +56,10 @@ export default function Header() {
                 </Link>
               )
             ))}
-            <Link href="/book">
+            <Link href="/booking">
               <a>
                 <Button size="sm" variant="outline">
-                  Booking request (subject to confirmation)
+                  Book Online (Instant Confirmation)
                 </Button>
               </a>
             </Link>
@@ -114,9 +114,9 @@ export default function Header() {
                 )
               ))}
               <div className="px-4 pt-2">
-                <Link href="/book">
+                <Link href="/booking">
                   <a onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full" variant="outline">Booking request (subject to confirmation)</Button>
+                    <Button className="w-full" variant="outline">Book Online (Instant Confirmation)</Button>
                   </a>
                 </Link>
                 <div className="mt-2 text-xs text-muted-foreground">

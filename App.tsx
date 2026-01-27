@@ -34,7 +34,7 @@ function Router() {
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/areas/:slug" component={LocationPage} />
       <Route path="/areas" component={ServiceAreas} />
-      <Route path="/book" component={BookingRequest} />
+      <Route path="/book" component={PrepaidBooking} />
       <Route path="/quote" component={Quote} />
       
       {/* Prepaid Booking System */}

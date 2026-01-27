@@ -56,7 +56,7 @@ const bookingFormSchema = z.object({
   preferredDate: z.string().min(1, 'Please select a date'),
   preferredTime: z.string().min(1, 'Please select a time'),
   policyAgreed: z.boolean().refine(val => val === true, 'You must agree to the terms'),
-  serviceType: z.enum(['mobile_diagnostic', 'pre_purchase_inspection']),
+  serviceType: z.enum(['mobile_diagnostic', 'pre_purchase_inspection', 'general_service']),
   
   // Diagnostic fields
   wontStart: z.boolean().optional(),
@@ -93,6 +93,12 @@ const SERVICES = {
     name: 'Pre-Purchase Inspection',
     description: 'Comprehensive vehicle inspection before purchase. Full mechanical and visual assessment.',
     price: 180,
+  },
+  general_service: {
+    id: 'general_service',
+    name: 'General Service / Repair',
+    description: 'General mechanical repairs, servicing, or other inquiries. Booking handled via Gearbox.',
+    price: 0,
   },
 };
 
@@ -155,6 +161,10 @@ export default function PrepaidBooking() {
 
   // Calculate total price
   useEffect(() => {
+    if (watchServiceType === 'general_service') {
+      setTotalPrice(0);
+      return;
+    }
     let total = SERVICES[watchServiceType]?.price || 140;
     if (watchPrioritySameDay) total += ADD_ONS.prioritySameDay.price;
     if (watchOutsideArea) total += ADD_ONS.outsideAreaSurcharge.price;
@@ -305,7 +315,7 @@ export default function PrepaidBooking() {
                     <CardDescription>Choose the service you need</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 md:grid-cols-3">
                       {Object.values(SERVICES).map((service) => (
                         <label
                           key={service.id}
@@ -324,7 +334,7 @@ export default function PrepaidBooking() {
                           />
                           <div className="flex justify-between items-start mb-2">
                             <span className="font-semibold text-gray-900">{service.name}</span>
-                            <span className="text-xl font-bold text-blue-600">${service.price}</span>
+                            {service.price > 0 && <span className="text-xl font-bold text-blue-600">${service.price}</span>}
                           </div>
                           <p className="text-sm text-gray-600">{service.description}</p>
                           {watchServiceType === service.id && (
@@ -426,10 +436,34 @@ export default function PrepaidBooking() {
                         </div>
                       </div>
                     )}
+
+                    {/* Gearbox Smart Iframe for General Service */}
+                    {watchServiceType === 'general_service' && (
+                      <div className="mt-8 space-y-4">
+                        <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                          <p className="text-sm text-blue-800">
+                            <strong>Note:</strong> For general services and repairs, we use our Gearbox booking system. 
+                            Your details below will be synced where possible.
+                          </p>
+                        </div>
+                        <div className="w-full h-[700px] border rounded-xl overflow-hidden bg-white shadow-inner">
+                          <iframe
+                            src={`https://gearbox-workshop-production.up.railway.app/public/booking/2?name=${encodeURIComponent(form.watch('customerName') || '')}&email=${encodeURIComponent(form.watch('email') || '')}&phone=${encodeURIComponent(form.watch('phone') || '')}&rego=${encodeURIComponent(form.watch('vehicleRego') || '')}&address=${encodeURIComponent(form.watch('address') || '')}`}
+                            width="100%"
+                            height="100%"
+                            frameBorder="0"
+                            title="Gearbox Booking Form"
+                            className="w-full h-full"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
-                {/* Customer Details */}
+                {watchServiceType !== 'general_service' && (
+                  <>
+                    {/* Customer Details */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -790,7 +824,8 @@ export default function PrepaidBooking() {
                     </div>
                   </CardContent>
                 </Card>
-
+                  </>
+                )}
               </form>
             </div>
           </div>

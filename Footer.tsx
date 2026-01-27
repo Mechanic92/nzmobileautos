@@ -60,8 +60,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/book">
-                  <a className="text-muted-foreground hover:text-accent transition-colors">Booking request (subject to confirmation)</a>
+                <Link href="/booking">
+                  <a className="text-muted-foreground hover:text-accent transition-colors">Book Online</a>
                 </Link>
               </li>
               <li>

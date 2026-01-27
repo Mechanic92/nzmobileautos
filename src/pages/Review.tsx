@@ -12,11 +12,7 @@ import Header from '../../Header';
 import Footer from '../../Footer';
 
 // Configure your Google Business Profile review link here
-// To find your link:
-// 1. Go to Google Maps and search for your business
-// 2. Click "Write a review" and copy the URL
-// Or use: https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID
-const GOOGLE_REVIEW_URL = 'https://g.page/r/mobileautoworksnz/review';
+const GOOGLE_REVIEW_URL = (import.meta as any).env?.VITE_GOOGLE_REVIEW_URL || 'https://g.page/r/mobileautoworksnz/review';
 
 // Alternative: Direct place ID link (replace with your actual place ID)
 // const GOOGLE_REVIEW_URL = 'https://search.google.com/local/writereview?placeid=ChIJ...';

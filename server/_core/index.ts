@@ -7,9 +7,15 @@ import { createContext } from "./trpc";
 import { ENV } from "./env";
 import path from "path";
 import { fileURLToPath } from "url";
-import { seedBlogPosts, updateBookingStatus } from "../../db";
+import { seedBlogPosts, updateBookingStatus, getBookingById } from "../../db";
 import { stripe } from "../utils/stripe";
-import { sendAdminQuoteEmail, sendCustomerQuoteEmail } from "../utils/email";
+import { 
+  sendAdminQuoteEmail, 
+  sendCustomerQuoteEmail,
+  sendAdminBookingConfirmation,
+  sendCustomerBookingConfirmation
+} from "../utils/email";
+import { notifyOwnerViaSMS } from "../utils/sms";
 
 const app = express();
 
@@ -29,10 +35,62 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as any;
       const bookingId = parseInt(session.metadata?.bookingId || "0");
+      
       if (bookingId) {
-        // Confirm booking and mark as paid
-        await updateBookingStatus(bookingId, "confirmed", undefined, undefined, undefined, "paid");
-        console.log(`[Stripe] Booking ${bookingId} confirmed via webhook`);
+        // Idempotency check: Get current booking state
+        const booking = await getBookingById(bookingId);
+        if (booking && booking.paymentStatus === "paid") {
+          console.log(`[Stripe] Webhook: Booking ${bookingId} already processed (idempotent skip)`);
+          res.json({ received: true });
+          return;
+        }
+
+        // Determine confirmed status based on metadata
+        const isWeekendBooking = session.metadata?.isWeekendBooking === 'true';
+        const finalStatus = isWeekendBooking ? 'pending_weekend_approval' : 'confirmed';
+
+        // Update booking in DB
+        await updateBookingStatus(
+          bookingId, 
+          finalStatus, 
+          undefined, 
+          undefined, 
+          undefined, 
+          "paid"
+        );
+        
+        console.log(`[Stripe] Booking ${bookingId} marked as PAID (${finalStatus}) via webhook`);
+
+        // Prepare notification data
+        const notificationData = {
+          bookingRef: session.metadata?.bookingRef || `ID-${bookingId}`,
+          customerName: session.metadata?.customerName || '',
+          phone: session.metadata?.phone || '',
+          email: session.metadata?.email || '',
+          address: session.metadata?.address || '',
+          suburb: 'Auckland',
+          vehicleRego: session.metadata?.vehicleRego || '',
+          vehicleMake: 'Unknown',
+          vehicleModel: 'Unknown',
+          vehicleYear: 0,
+          serviceType: session.metadata?.serviceType || 'Service',
+          appointmentDate: session.metadata?.preferredDate || '',
+          appointmentTime: session.metadata?.preferredTime || '',
+          notes: session.metadata?.notes || '',
+          stripeSessionId: session.id,
+          amountPaid: session.amount_total || 0,
+          paidAt: new Date().toISOString(),
+        };
+
+        // Send notifications asynchronously
+        await Promise.allSettled([
+          sendAdminBookingConfirmation(notificationData),
+          sendCustomerBookingConfirmation(notificationData),
+          notifyOwnerViaSMS({
+            ...notificationData,
+            amountPaid: session.amount_total || 0,
+          }),
+        ]);
       }
     }
 
