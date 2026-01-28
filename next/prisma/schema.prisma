@@ -183,9 +183,39 @@ model Booking {
   reports            ServiceReport[]
   job                Job?
 
+  holdExpiresAt      DateTime?
+  idempotencyKey     String?   @unique
+
   @@index([status])
   @@index([slotStart])
   @@index([customerId])
+}
+
+model VehicleCache {
+  plate               String   @id
+  identityJson        Json
+  classificationJson  Json
+  createdAt           DateTime @default(now())
+  expiresAt           DateTime
+  lastAccessAt        DateTime @default(now())
+  lookupCount         Int      @default(0)
+
+  @@index([expiresAt])
+}
+
+model LookupLog {
+  id          String   @id @default(uuid())
+  plateHash   String
+  ip          String
+  fingerprint String?
+  email       String?
+  source      String
+  status      String
+  createdAt   DateTime @default(now())
+
+  @@index([ip, createdAt])
+  @@index([fingerprint, createdAt])
+  @@index([plateHash])
 }
 
 model ServiceReport {
@@ -366,4 +396,35 @@ model IdempotencyKey {
   createdAt   DateTime @default(now())
 
   @@unique([scope, key])
+}
+
+model InstantQuote {
+  id                  String   @id @default(uuid())
+  publicId            String   @unique
+  status              String   @default("NEW")
+  pricingSnapshotJson Json
+  vehicleId           String?
+  customerId          String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model TechnicianSchedule {
+  id          String   @id @default(uuid())
+  date        DateTime @unique
+  startTime   String
+  endTime     String
+  maxBookings Int      @default(4)
+  bookedSlots Json?    // Array of slots or similar
+  primaryZone String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GeographicZone {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  suburbs       String[]
+  preferredDays String[]
+  isActive      Boolean  @default(true)
 }

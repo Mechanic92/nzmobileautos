@@ -16,9 +16,9 @@ export default function HomePage() {
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <a
               className="px-5 py-3 rounded-lg bg-brand-yellow text-black font-semibold no-underline hover:bg-brand-yellow/90"
-              href="/book/diagnostics"
+              href="/instant-quote"
             >
-              Book Diagnostics
+              Get Instant Price
             </a>
             <a className="px-5 py-3 rounded-lg border border-white/15 text-white no-underline hover:bg-white/5" href="/book/quote">
               Request a Quote
