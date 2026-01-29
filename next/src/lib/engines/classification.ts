@@ -24,7 +24,7 @@ export function classifyVehicle(mw: any): VehicleClass {
   // Body & Load Mapping
   let body_class: VehicleClass['body_class'] = 'CAR';
   if (body.includes('SUV')) body_class = 'SUV';
-  if (body.includes('UTE')) body_class = 'UTE';
+  if (body.includes('UTE') || body.includes('UTILITY')) body_class = 'UTE';
   if (body.includes('VAN')) body_class = 'VAN';
   
   // Power & Performance Gating (>200kW is PERFORMANCE)

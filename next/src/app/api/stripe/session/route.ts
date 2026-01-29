@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
 
     // 4. Create Booking (PENDING_PAYMENT)
     const pricing = quote.pricingSnapshotJson as any;
-    const holdExpiresAt = addMinutes(new Date(), 15);
+    const holdExpiresAt = addMinutes(new Date(), 32);
 
     const booking = await prisma.booking.create({
       data: {
@@ -163,6 +163,6 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error('[Stripe Session] Error:', error.message);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
   }
 }

@@ -1,8 +1,16 @@
 /**
- * Gearbox SaaS Public Ingestion Client
- * Handles pushing confirmed bookings into the Gearbox system.
+ * Gearbox Workshop Management Integration
+ * Uses the PUBLIC tRPC API - No authentication required!
+ * 
+ * Gearbox URL: https://gearbox-workshop-production.up.railway.app
+ * API: /api/trpc (public booking endpoints)
+ * 
+ * Requirements:
+ * - GEARBOX_SHOP_ID (Ledger ID from Gearbox settings)
+ * - No API key needed - endpoints are public!
  */
-export async function pushToGearbox(payload: {
+
+interface GearboxBookingPayload {
   customer: {
     name: string;
     email: string;
@@ -28,28 +36,51 @@ export async function pushToGearbox(payload: {
     stripeSessionId: string;
     amount: number;
   };
-}) {
-  const GEARBOX_API_URL = process.env.GEARBOX_API_URL || 'https://api.gearbox.io/v1'; // Placeholder
-  const GEARBOX_API_KEY = process.env.GEARBOX_API_KEY;
+}
 
-  if (!GEARBOX_API_KEY) {
-    console.error('[Gearbox] API Key missing. Skipping ingestion.');
-    return { success: false, error: 'API_KEY_MISSING' };
-  }
+export async function pushToGearbox(payload: GearboxBookingPayload) {
+  const GEARBOX_API_URL = process.env.GEARBOX_API_URL || 'https://gearbox-workshop-production.up.railway.app';
+  const GEARBOX_SHOP_ID = process.env.GEARBOX_SHOP_ID || process.env.GEARBOX_LEDGER_ID || '3';
 
-  const endpoint = `${GEARBOX_API_URL}/public/bookings/ingest`;
+  // Construct tRPC endpoint for public booking creation
+  const endpoint = `${GEARBOX_API_URL}/api/trpc/publicBooking.create`;
 
   const makeRequest = async () => {
+    // tRPC format: POST with input in query string or body
+    const bookingData = {
+      shopId: GEARBOX_SHOP_ID,
+      customer: {
+        name: payload.customer.name,
+        email: payload.customer.email,
+        phone: payload.customer.phone,
+      },
+      vehicle: {
+        registration: payload.vehicle.plate,
+        vin: payload.vehicle.vin || '',
+        make: payload.vehicle.make,
+        model: payload.vehicle.model,
+        year: payload.vehicle.year.toString(),
+      },
+      service: {
+        type: payload.booking.serviceType,
+        description: `${payload.booking.serviceType} - Booked via website`,
+        scheduledDate: payload.booking.startTime.toISOString(),
+        scheduledTime: payload.booking.startTime.toISOString().split('T')[1].substring(0, 5),
+        duration: 60, // Default 1 hour
+        address: payload.booking.address,
+      },
+      notes: `Website Booking ID: ${payload.booking.id}\nStripe Session: ${payload.payment.stripeSessionId}\nAmount Paid: $${payload.payment.amount}\nPayment Status: PAID`,
+      source: 'WEBSITE',
+      externalId: payload.booking.id,
+    };
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GEARBOX_API_KEY}`,
       },
       body: JSON.stringify({
-        ...payload,
-        source: 'WEBSITE_CONVERSION_ENGINE',
-        version: '1.0'
+        input: bookingData
       }),
     });
 
@@ -58,26 +89,49 @@ export async function pushToGearbox(payload: {
       throw new Error(`Gearbox API Error: ${response.status} - ${errorText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    return result.result?.data || result;
   };
 
-  // Simple retry logic (3 attempts)
+  // Retry logic (3 attempts with exponential backoff)
   let attempts = 0;
   while (attempts < 3) {
     try {
       const result = await makeRequest();
-      console.log(`[Gearbox] Ingestion successful for booking ${payload.booking.id}`);
-      return { success: true, jobId: result.id };
+      console.log(`[Gearbox] Booking created successfully for ${payload.booking.id}`, result);
+      
+      // Extract job/booking ID from response
+      const jobId = result.id || result.bookingId || result.jobId;
+      
+      return { 
+        success: true, 
+        jobId,
+        message: 'Booking synced to Gearbox'
+      };
     } catch (error: any) {
       attempts++;
       console.error(`[Gearbox] Attempt ${attempts} failed:`, error.message);
+      
       if (attempts >= 3) {
-        return { success: false, error: error.message };
+        // Log error but don't fail the webhook - booking is still confirmed
+        console.error(`[Gearbox] Max retries exceeded for booking ${payload.booking.id}`);
+        console.error(`[Gearbox] Manual sync may be required`);
+        
+        return { 
+          success: false, 
+          error: error.message,
+          requiresManualSync: true
+        };
       }
-      // Backoff? Optional for now.
-      await new Promise(r => setTimeout(r, 1000 * attempts));
+      
+      // Exponential backoff: 1s, 2s, 4s
+      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempts - 1)));
     }
   }
 
-  return { success: false, error: 'MAX_RETRIES_EXCEEDED' };
+  return { 
+    success: false, 
+    error: 'MAX_RETRIES_EXCEEDED',
+    requiresManualSync: true
+  };
 }

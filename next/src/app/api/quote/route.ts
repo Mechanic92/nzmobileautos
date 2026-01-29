@@ -75,7 +75,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: quoteId });
 
   } catch (error: any) {
-    console.error('[Quote POST Error]:', error.message);
-    return NextResponse.json({ error: 'Internal Error' }, { status: 500 });
+    console.error('[Quote POST Error]:', error);
+    console.error('[Quote POST Stack]:', error.stack);
+    return NextResponse.json({ error: 'Internal Error', details: error.message }, { status: 500 });
   }
 }

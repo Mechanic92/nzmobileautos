@@ -254,8 +254,8 @@ model QuoteRequest {
   customer            Customer      @relation(fields: [customerId], references: [id])
   vehicleId           String?
   vehicle             Vehicle?      @relation(fields: [vehicleId], references: [id])
-  addressId           String
-  address             Address       @relation(fields: [addressId], references: [id])
+  addressId           String?
+  address             Address?       @relation(fields: [addressId], references: [id])
 
   symptoms            Json
   description         String?

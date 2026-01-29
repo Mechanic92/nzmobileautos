@@ -344,6 +344,37 @@ export const vehicleRouter = router({
       return { provider: "motorweb_robot" as const, summary, raw, contentType: result.contentType };
     }),
 
+  chassisCheck: adminProcedure
+    .input(
+      z.object({
+        plateOrVin: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const motorWebRobotBaseUrl = (process.env.MOTORWEB_ROBOT_BASE_URL || "https://robot.motorweb.co.nz").replace(/\/$/, "");
+
+      const normalizedInput = input.plateOrVin.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (!normalizedInput) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Provide a valid plate or vin" });
+      }
+
+      const result = await motorWebRobotRequest({
+        baseUrl: motorWebRobotBaseUrl,
+        path: "/b2b/chassischeck/generate/4.0",
+        query: {
+          plateOrVin: normalizedInput,
+        },
+      });
+
+      const raw = result.data ?? result.text;
+      
+      return { 
+        provider: "motorweb_robot" as const, 
+        raw, 
+        contentType: result.contentType 
+      };
+    }),
+
   lookup: publicProcedure
     .input(z.object({ plate: z.string() }))
     .mutation(async ({ input }) => {

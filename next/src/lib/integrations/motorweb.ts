@@ -37,9 +37,10 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
 
   const makeRequest = async () => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
     try {
+      console.log('Sending MotorWeb request...');
       const response = await undiciFetch(url, {
         method: 'GET',
         // @ts-ignore
@@ -49,6 +50,7 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
           'Accept': 'application/xml',
         },
       });
+      console.log('Received response:', response.status);
 
       clearTimeout(timeoutId);
 
@@ -60,6 +62,7 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
       return parseMotorWebXml(xmlData);
     } catch (error: any) {
       clearTimeout(timeoutId);
+      console.error('Request failed:', error.message);
       throw error;
     }
   };

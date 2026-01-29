@@ -39,6 +39,11 @@ coverage/
 *.tmp
 *.temp
 .cache/
+*.png
+*.html
+*.log
+debug_book.html
+debug.html
 
 # Drizzle
 drizzle/meta/

@@ -1,1 +1,0 @@
-{"version":1,"functions":{"/api/bookings/create":{},"/api/cron/expire-bookings":{},"/api/calendar.ics":{},"/api/bookings/fallback":{},"/api/health":{},"/api/quotes/create":{},"/api/stripe/webhook":{},"/book/diagnostics":{}}}
