@@ -1,0 +1,11 @@
+
+> mobileautoworks-next@0.1.0 build C:\nzmobileautos\next
+> prisma generate && next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Error: 
+EPERM: operation not permitted, rename 'C:\nzmobileautos\next\node_modules\.pnpm\@prisma+client@6.19.1_prism_d4c309513f45d21f4e4aa7921d8002c7\node_modules\.prisma\client\query_engine-windows.dll.node.tmp14312' -> 'C:\nzmobileautos\next\node_modules\.pnpm\@prisma+client@6.19.1_prism_d4c309513f45d21f4e4aa7921d8002c7\node_modules\.prisma\client\query_engine-windows.dll.node'
+
+
+ ELIFECYCLE  Command failed with exit code 1.
