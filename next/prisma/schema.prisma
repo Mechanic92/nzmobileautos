@@ -1,0 +1,389 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Customer {
+  id                String         @id @default(uuid())
+  publicId          String         @unique
+  fullName          String
+  email             String?
+  phone             String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  serviceM8ClientId String?        @unique
+  addresses         Address[]
+  bookings          Booking[]
+  jobs              Job[]
+  quoteRequests     QuoteRequest[]
+  vehicles          Vehicle[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+model Vehicle {
+  id            String         @id @default(uuid())
+  publicId      String         @unique
+  customerId    String
+  plate         String?
+  vin           String?
+  make          String?
+  model         String?
+  year          Int?
+  fuel          String?
+  odometer      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  bookings      Booking[]
+  jobs          Job[]
+  quoteRequests QuoteRequest[]
+  customer      Customer       @relation(fields: [customerId], references: [id])
+
+  @@index([plate])
+  @@index([vin])
+}
+
+model Address {
+  id            String         @id @default(uuid())
+  publicId      String         @unique
+  customerId    String
+  line1         String
+  suburb        String
+  city          String
+  postcode      String?
+  lat           Float?
+  lng           Float?
+  travelBand    String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  customer      Customer       @relation(fields: [customerId], references: [id])
+  bookings      Booking[]
+  jobs          Job[]
+  quoteRequests QuoteRequest[]
+
+  @@index([suburb])
+}
+
+model Booking {
+  id                  String          @id @default(uuid())
+  publicId            String          @unique
+  kind                BookingKind
+  status              BookingStatus
+  customerId          String
+  vehicleId           String?
+  addressId           String
+  slotStart           DateTime
+  slotEnd             DateTime
+  afterHours          Boolean         @default(false)
+  symptomPreset       String?
+  notes               String?
+  pricingSnapshotJson Json
+  stripeSessionId     String?
+  paymentExpiresAt    DateTime?
+  serviceM8JobId      String?         @unique
+  serviceM8Url        String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  holdExpiresAt       DateTime?
+  idempotencyKey      String?         @unique
+  address             Address         @relation(fields: [addressId], references: [id])
+  customer            Customer        @relation(fields: [customerId], references: [id])
+  vehicle             Vehicle?        @relation(fields: [vehicleId], references: [id])
+  job                 Job?
+  media               Media[]
+  reports             ServiceReport[]
+
+  @@index([status])
+  @@index([slotStart])
+  @@index([customerId])
+}
+
+model VehicleCache {
+  plate              String   @id
+  identityJson       Json
+  classificationJson Json
+  createdAt          DateTime @default(now())
+  expiresAt          DateTime
+  lastAccessAt       DateTime @default(now())
+  lookupCount        Int      @default(0)
+
+  @@index([expiresAt])
+}
+
+model LookupLog {
+  id          String   @id @default(uuid())
+  plateHash   String
+  ip          String
+  fingerprint String?
+  email       String?
+  source      String
+  status      String
+  createdAt   DateTime @default(now())
+  costCents   Int      @default(0)
+
+  @@index([ip, createdAt])
+  @@index([fingerprint, createdAt])
+  @@index([plateHash])
+}
+
+model ServiceReport {
+  id          String              @id @default(uuid())
+  bookingId   String
+  type        ServiceReportType
+  status      ServiceReportStatus @default(DRAFT)
+  /// *
+  ///    * JSON payload for the report (markdown content, structured fields, attachment list, etc.)
+  dataJson    Json
+  /// *
+  ///    * Public token used for customer-facing link: /report/[token]
+  publicToken String              @unique
+  emailedAt   DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  booking     Booking             @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+}
+
+model QuoteRequest {
+  id                  String        @id @default(uuid())
+  publicId            String        @unique
+  status              RequestStatus
+  category            QuoteCategory
+  urgency             QuoteUrgency
+  customerId          String
+  vehicleId           String?
+  addressId           String?
+  symptoms            Json
+  description         String?
+  pricingSnapshotJson Json
+  serviceM8JobId      String?       @unique
+  serviceM8Url        String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  job                 Job?
+  media               Media[]
+  address             Address?      @relation(fields: [addressId], references: [id])
+  customer            Customer      @relation(fields: [customerId], references: [id])
+  vehicle             Vehicle?      @relation(fields: [vehicleId], references: [id])
+
+  @@index([status])
+  @@index([category])
+  @@index([customerId])
+}
+
+model Job {
+  id             String        @id @default(uuid())
+  publicId       String        @unique
+  status         JobStatus     @default(NEW)
+  title          String
+  description    String?
+  internalNotes  String?
+  customerId     String
+  vehicleId      String?
+  addressId      String
+  quoteRequestId String?       @unique
+  bookingId      String?       @unique
+  scheduledStart DateTime?
+  scheduledEnd   DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  address        Address       @relation(fields: [addressId], references: [id])
+  booking        Booking?      @relation(fields: [bookingId], references: [id])
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  quoteRequest   QuoteRequest? @relation(fields: [quoteRequestId], references: [id])
+  vehicle        Vehicle?      @relation(fields: [vehicleId], references: [id])
+
+  @@index([status])
+  @@index([scheduledStart])
+  @@index([customerId])
+}
+
+model Media {
+  id             String         @id @default(uuid())
+  publicId       String         @unique
+  ownerType      MediaOwnerType
+  bookingId      String?
+  quoteRequestId String?
+  contentType    String
+  sizeBytes      Int
+  r2Key          String
+  sha256         String?
+  createdAt      DateTime       @default(now())
+  booking        Booking?       @relation(fields: [bookingId], references: [id])
+  quoteRequest   QuoteRequest?  @relation(fields: [quoteRequestId], references: [id])
+
+  @@index([ownerType])
+}
+
+model AvailabilityBlock {
+  id        String   @id @default(uuid())
+  start     DateTime
+  end       DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([start])
+  @@index([end])
+}
+
+model AdminUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String         @id @default(uuid())
+  actorType  AuditActorType
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String
+  beforeJson Json?
+  afterJson  Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime       @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model IntegrationToken {
+  id              String              @id @default(uuid())
+  provider        IntegrationProvider
+  label           String              @default("default")
+  accessTokenEnc  String
+  refreshTokenEnc String?
+  iv              String
+  authTag         String
+  expiresAt       DateTime?
+  scopes          String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@unique([provider, label])
+}
+
+model IdempotencyKey {
+  id           String   @id @default(uuid())
+  scope        String
+  key          String
+  requestHash  String?
+  responseJson Json?
+  createdAt    DateTime @default(now())
+
+  @@unique([scope, key])
+}
+
+model InstantQuote {
+  id                  String   @id @default(uuid())
+  publicId            String   @unique
+  status              String   @default("NEW")
+  pricingSnapshotJson Json
+  vehicleId           String?
+  customerId          String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model TechnicianSchedule {
+  id          String   @id @default(uuid())
+  date        DateTime @unique
+  startTime   String
+  endTime     String
+  maxBookings Int      @default(4)
+  bookedSlots Json?
+  primaryZone String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GeographicZone {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  suburbs       String[]
+  preferredDays String[]
+  isActive      Boolean  @default(true)
+}
+
+enum BookingKind {
+  DIAGNOSTICS
+}
+
+enum BookingStatus {
+  NEW
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED
+  EXPIRED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum QuoteCategory {
+  BRAKES
+  WOF_REPAIRS
+  SERVICING
+  OTHER
+}
+
+enum QuoteUrgency {
+  TODAY
+  THIS_WEEK
+  FLEXIBLE
+}
+
+enum RequestStatus {
+  NEW
+  CONTACTED
+  BOOKED
+  IN_PROGRESS
+  COMPLETED
+  CLOSED
+}
+
+enum JobStatus {
+  NEW
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  CLOSED
+}
+
+enum MediaOwnerType {
+  BOOKING
+  QUOTE_REQUEST
+  REPORT
+}
+
+enum IntegrationProvider {
+  SERVICEM8
+}
+
+enum ServiceReportType {
+  DIAGNOSTICS
+  PPI
+}
+
+enum ServiceReportStatus {
+  DRAFT
+  FINAL
+}
+
+enum AuditActorType {
+  ADMIN
+  SYSTEM
+}

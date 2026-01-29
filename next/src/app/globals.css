@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Master palette per brand spec */
+  --bg: #0F1115;
+  --surface: #151922;
+  --surface2: #1C2029;
+  --text: #FFFFFF;
+  --muted: #B8C0CC;
+  --border: rgba(255, 255, 255, 0.08);
+  --primary: #F5B800;
+  --primaryText: #0F1115;
+  --focus: #F5B800;
+  --success: #22c55e;
+  --danger: #ef4444;
+
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  @apply mx-auto w-full max-w-6xl px-4;
+}
+
+a {
+  @apply underline-offset-4;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Mobile UX: safe area padding for iOS notch/home indicator */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .container {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Ensure form buttons stay visible above mobile keyboard */
+@media (max-width: 640px) {
+  form button[type="submit"] {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 10;
+  }
+}
+
+/* Scroll margin for anchor links to account for sticky header */
+[id] {
+  scroll-margin-top: 5rem;
+}
