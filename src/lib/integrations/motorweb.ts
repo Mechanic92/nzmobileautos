@@ -51,34 +51,61 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
       }
     };
 
-    console.log('Requesting MotorWeb via https.request...');
-    const req = https.request(url, options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => data += chunk);
-      res.on('end', () => {
-        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-          try {
-            resolve(parseMotorWebXml(data));
-          } catch (e) {
-            reject(new Error('Failed to parse MotorWeb XML: ' + (e as Error).message));
-          }
-        } else {
-          reject(new Error(`MotorWeb API error: ${res.statusCode} ${res.statusMessage}. Data: ${data}`));
-        }
+    // If switching to undici, this block would be relevant:
+    /*
+    let dispatcher;
+    try {
+      dispatcher = new Agent({
+        connect: {
+          pfx,
+          passphrase,
+          servername: 'robot.motorweb.co.nz',
+        },
       });
-    });
+    } catch (e: any) {
+      const pfxSummary = pfx ? pfx.slice(0, 16).toString('hex') : 'null';
+      const pfxSize = pfx ? pfx.length : 0;
+      throw new Error(`Failed to create Agent: ${e.message} (PFX size: ${pfxSize}, Hex: ${pfxSummary})`);
+    }
+    // Then use dispatcher for the request, e.g., fetch(url, { dispatcher, ... })
+    */
 
-    req.on('error', (e) => {
-      console.error('MotorWeb Request Error:', e);
-      reject(e);
-    });
+    console.log('Requesting MotorWeb via https.request...');
+    try {
+      const req = https.request(url, options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => data += chunk);
+        res.on('end', () => {
+          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+            try {
+              resolve(parseMotorWebXml(data));
+            } catch (e: any) {
+              reject(new Error(`Failed to parse MotorWeb XML: ${e.message}`));
+            }
+          } else {
+            reject(new Error(`MotorWeb API error: ${res.statusCode} ${res.statusMessage}. Data: ${data}`));
+          }
+        });
+      });
 
-    req.setTimeout(30000, () => {
-      req.destroy();
-      reject(new Error('MotorWeb request timed out'));
-    });
+      req.on('error', (e) => {
+        const hex = pfx.slice(0, 16).toString('hex');
+        const size = pfx.length;
+        console.error('MotorWeb Request Error:', e.message, 'PFX Size:', size, 'Hex:', hex);
+        reject(new Error(`MotorWeb Request Error: ${e.message} (PFX size: ${size}, Hex: ${hex})`));
+      });
 
-    req.end();
+      req.setTimeout(30000, () => {
+        req.destroy();
+        reject(new Error('MotorWeb request timed out'));
+      });
+
+      req.end();
+    } catch (e: any) {
+      const hex = pfx.slice(0, 16).toString('hex');
+      const size = pfx.length;
+      reject(new Error(`Synchronous https.request Error: ${e.message} (PFX size: ${size}, Hex: ${hex})`));
+    }
   });
 }
 
