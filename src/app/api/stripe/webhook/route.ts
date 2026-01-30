@@ -2,9 +2,10 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { assertDbHealthyOrThrow, DbUnavailableError, db, dbHealthCheck, isDevNoDb } from "@/server/db";
-import { sendBookingConfirmedBusinessEmail, sendStripeOrphanPaymentBusinessEmail } from "@/server/email";
+import { sendBookingConfirmedBusinessEmail, sendBookingConfirmedCustomerEmail, sendStripeOrphanPaymentBusinessEmail } from "@/server/email";
 import { prisma } from "@/server/prisma";
 import { pushPaidJobToGearbox } from "@/lib/integrations/gearbox";
+import { createGoogleCalendarEvent } from "@/lib/integrations/googleCalendar";
 
 export const runtime = "nodejs";
 
@@ -69,13 +70,14 @@ export async function POST(req: Request) {
     if (bookingId) {
       await db().updateBookingStatus({ id: bookingId }, { status: "CONFIRMED" });
 
+      // Fetch full booking record once for downstream side-effects.
+      const full = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: { customer: true, address: true, vehicle: true },
+      });
+
       // Best-effort: push paid job payload to Gearbox (no Gearbox booking API usage).
       try {
-        const full = await prisma.booking.findUnique({
-          where: { id: bookingId },
-          include: { customer: true, address: true, vehicle: true },
-        });
-
         if (full) {
           const pricing = full.pricingSnapshotJson as any;
           const totalAmountCents =
@@ -121,14 +123,73 @@ export async function POST(req: Request) {
         console.error("pushPaidJobToGearbox failed", err);
       }
 
+      // Best-effort: create Google Calendar event.
+      try {
+        const calendarId = (process.env.GOOGLE_CALENDAR_ID || "").trim();
+        if (full && calendarId) {
+          const addressOneLine = `${full.address.line1}, ${full.address.suburb}, ${full.address.city}`;
+          const vehicleDesc = [full.vehicle?.year, full.vehicle?.make, full.vehicle?.model].filter(Boolean).join(" ");
+          const summary = `Mobile Autoworks – ${full.kind} – ${full.vehicle?.plate || ""}`.trim();
+          const description = [
+            `Booking ref: ${full.publicId}`,
+            `Customer: ${full.customer.fullName} (${full.customer.phone || ""})`,
+            full.customer.email ? `Email: ${full.customer.email}` : null,
+            full.vehicle?.plate ? `Plate: ${full.vehicle.plate}` : null,
+            vehicleDesc ? `Vehicle: ${vehicleDesc}` : null,
+            full.notes ? `Notes: ${full.notes}` : null,
+          ]
+            .filter(Boolean)
+            .join("\n");
+
+          const cal = await createGoogleCalendarEvent({
+            calendarId,
+            summary,
+            description,
+            location: addressOneLine,
+            startUtc: full.slotStart,
+            endUtc: full.slotEnd,
+            timeZone: "Pacific/Auckland",
+          });
+
+          if (!cal.ok) {
+            // eslint-disable-next-line no-console
+            console.error("createGoogleCalendarEvent not configured", cal);
+          } else {
+            // eslint-disable-next-line no-console
+            console.log("Google Calendar event created", { bookingId, eventId: cal.eventId, htmlLink: cal.htmlLink });
+          }
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("createGoogleCalendarEvent failed", err);
+      }
+
+      // Best-effort: send customer confirmation email.
+      try {
+        if (full?.customer?.email) {
+          const appUrl = process.env.APP_URL || "";
+          const manageUrl = appUrl ? `${appUrl}/booking/success?session_id=${encodeURIComponent(session?.id || "")}` : undefined;
+          const addressOneLine = `${full.address.line1}, ${full.address.suburb}, ${full.address.city}`;
+          const vehiclePlate = full.vehicle?.plate || "(not provided)";
+
+          await sendBookingConfirmedCustomerEmail({
+            toEmail: full.customer.email,
+            customerName: full.customer.fullName,
+            bookingPublicId: full.publicId,
+            slotStartIso: full.slotStart.toISOString(),
+            addressOneLine,
+            vehiclePlate,
+            manageUrl,
+          });
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("sendBookingConfirmedCustomerEmail failed", err);
+      }
+
       const businessEmail = process.env.BUSINESS_EMAIL;
       const appUrl = process.env.APP_URL || "http://localhost:3000";
       if (businessEmail) {
-        const full = await prisma.booking.findUnique({
-          where: { id: bookingId },
-          include: { customer: true, address: true, vehicle: true },
-        });
-
         if (full) {
           const addressOneLine = `${full.address.line1}, ${full.address.suburb}, ${full.address.city}`;
           const vehiclePlate = full.vehicle?.plate || "(not provided)";
