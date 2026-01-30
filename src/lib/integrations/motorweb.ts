@@ -28,13 +28,16 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
 
   let pfx: Buffer;
   const p12Path = path.join(process.cwd(), 'motorweb.p12');
+  console.log('MotorWeb P12 Path:', p12Path);
+  console.log('MotorWeb P12 Exists:', fs.existsSync(p12Path));
 
   if (fs.existsSync(p12Path)) {
     pfx = fs.readFileSync(p12Path);
-  } else if (process.env.MOTORWEB_P12_B64) {
+  } else if (process.env.MOTORWEB_P12_B64 && process.env.MOTORWEB_P12_B64 !== 'small') {
+    console.log('Using MotorWeb P12 from env variable');
     pfx = Buffer.from(process.env.MOTORWEB_P12_B64, 'base64');
   } else {
-    throw new Error('MotorWeb mTLS certificate missing. Expected file at src/lib/integrations/motorweb.p12');
+    throw new Error('MotorWeb mTLS certificate missing. Expected file at ' + p12Path);
   }
 
   const dispatcher = new Agent({
