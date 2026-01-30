@@ -1,8 +1,9 @@
 import { Mail, Phone, MapPin, Clock, MessageSquare } from "lucide-react";
 
 export const metadata = {
-  title: "Contact Us",
-  description: "Get in touch with Mobile Autoworks NZ. Book your mobile mechanic service, ask questions, or request a quote. Serving all of Auckland with professional automotive services.",
+  title: "Contact Mobile Autoworks NZ | Book Your Auckland Mechanic",
+  description: "Get in touch with Auckland's #1 mobile mechanic. Book car diagnostics, pre-purchase inspections, or ask questions. Serving West Auckland, North Shore, and Central.",
+  keywords: ["contact mobile mechanic auckland", "book car inspection auckland", "mobile autoworks phone number", "mechanic available now auckland"],
 };
 
 export default function ContactPage() {

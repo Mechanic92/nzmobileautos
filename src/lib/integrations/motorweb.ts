@@ -27,7 +27,7 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
   }
 
   let pfx: Buffer;
-  const p12Path = path.join(process.cwd(), 'src/lib/integrations/motorweb.p12');
+  const p12Path = path.join(process.cwd(), 'motorweb.p12');
 
   if (fs.existsSync(p12Path)) {
     pfx = fs.readFileSync(p12Path);
