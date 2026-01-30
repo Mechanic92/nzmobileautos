@@ -62,11 +62,9 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
     try {
-      console.log('Sending MotorWeb request...');
-      const response = await undiciFetch(url, {
+      console.log('Sending MotorWeb request (testing without dispatcher)...');
+      const response = await fetch(url, {
         method: 'GET',
-        // @ts-ignore
-        dispatcher,
         signal: controller.signal,
         headers: {
           'Accept': 'application/xml',
