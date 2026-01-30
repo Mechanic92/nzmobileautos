@@ -2,8 +2,9 @@ import { Award, CheckCircle, Clock, MapPin, Phone, Shield, Star, Wrench } from "
 import Link from "next/link";
 
 export const metadata = {
-  title: "Mobile Mechanic Auckland | Mobile Diagnostics Auckland",
-  description: "Mobile mechanic Auckland. Mobile diagnostics Auckland, servicing and repairs across Central Auckland, West Auckland and the North Shore. Call or text 027 642 1824.",
+  title: "Mobile Mechanic Auckland | #1 Mobile Diagnostics & Inspections",
+  description: "Auckland's trusted mobile mechanic. Expert car diagnostics, pre-purchase inspections, and mechanical repairs at your door. West Auckland, North Shore & Central. Call 027 642 1824.",
+  keywords: ["mobile mechanic auckland", "car diagnostics auckland", "pre-purchase inspection auckland", "mobile car repair", "west auckland mechanic", "north shore mechanic"],
 };
 
 const heroImageUrl = "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&q=80&w=2000";

@@ -4,22 +4,27 @@ import { cookies } from "next/headers";
 import { adminCookieName, verifyAdminSession } from "@/server/adminSession";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.APP_URL || "https://mobileautoworksnz.com"),
+  metadataBase: new URL(process.env.APP_URL || "https://www.mobileautoworksnz.com"),
   title: {
-    default: "Mobile Autoworks NZ",
+    default: "Mobile Autoworks NZ | #1 Mobile Mechanic Auckland",
     template: "%s | Mobile Autoworks NZ",
   },
-  description: "Book diagnostics and pre-purchase inspections across Auckland.",
+  description: "Auckland's trusted mobile mechanic. Expert car diagnostics, pre-purchase inspections, and mechanical repairs at your door. Fixed pricing, same-day reports.",
+  keywords: ["mobile mechanic auckland", "car diagnostics auckland", "pre-purchase inspection auckland", "mobile car repair", "west auckland mechanic", "north shore mechanic", "auckland mobile car servicing"],
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     siteName: "Mobile Autoworks NZ",
-    url: "/",
-    title: "Mobile Autoworks NZ",
-    description: "Book diagnostics and pre-purchase inspections across Auckland.",
+    url: "https://www.mobileautoworksnz.com",
+    title: "Mobile Autoworks NZ | Expert Mobile Mechanic Auckland",
+    description: "Expert automotive care delivered to your home or office. Diagnostics, inspections, and repairs across Auckland.",
   },
+  robots: {
+    index: true,
+    follow: true,
+  }
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

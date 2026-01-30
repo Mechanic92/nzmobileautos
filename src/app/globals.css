@@ -1,18 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700;800&family=Inter:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Master palette per brand spec */
-  --bg: #0F1115;
-  --surface: #151922;
-  --surface2: #1C2029;
+  /* Original Brand Palette */
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface2: #141414;
   --text: #FFFFFF;
-  --muted: #B8C0CC;
-  --border: rgba(255, 255, 255, 0.08);
-  --primary: #F5B800;
-  --primaryText: #0F1115;
-  --focus: #F5B800;
+  --muted: rgba(255, 255, 255, 0.7);
+  --border: rgba(255, 255, 255, 0.1);
+  --primary: #fecb0a;
+  --primaryText: #000000;
+  --focus: #fecb0a;
   --success: #22c55e;
   --danger: #ef4444;
 
@@ -22,6 +24,11 @@
 html,
 body {
   height: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Raleway', sans-serif;
 }
 
 body {

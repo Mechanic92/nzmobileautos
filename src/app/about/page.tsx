@@ -2,8 +2,9 @@ import { Award, CheckCircle, Clock, Heart, MapPin, Phone, Shield, Star, Users, W
 import Link from "next/link";
 
 export const metadata = {
-  title: "About Us | Trusted Mobile Mechanic West Auckland",
-  description: "Learn more about Mobile Autoworks NZ. We are dedicated to providing honest, transparent, and high-quality mobile mechanical services across Auckland.",
+  title: "About Mobile Autoworks NZ | Expert Mechanic Chris",
+  description: "Learn about Mobile Autoworks NZ. Trade-qualified mechanic Chris brings 15+ years of expert automotive experience directly to your home or office in Auckland.",
+  keywords: ["about mobile autoworks nz", "chris mechanic auckland", "trade qualified mechanic auckland", "mobile car service story"],
 };
 
 const storyImageUrl = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&q=80&w=1000";
