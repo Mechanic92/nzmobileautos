@@ -257,7 +257,7 @@ export default function HomePage() {
                 },
                 {
                   name: "Sarah L.",
-                  location: "Te Atatū Peninsula",
+                  location: "Te Atatu Peninsula",
                   text: "So much easier than dropping my car at a workshop. He fixed my WOF failure items in my own driveway while I worked from home. Professional, honest, and very reasonable.",
                 },
                 {
