@@ -57,10 +57,10 @@ export default function BookingSuccessPage() {
               </p>
               <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
                  <div className="text-lg font-bold text-brand-yellow">
-                    {new Date(booking?.slotStart).toLocaleDateString('en-NZ', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    {new Date(booking?.slotStart).toLocaleDateString('en-NZ', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Pacific/Auckland' })}
                  </div>
                  <div className="text-white/50 font-mono">
-                    {new Date(booking?.slotStart).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(booking?.slotStart).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit', timeZone: 'Pacific/Auckland' })}
                  </div>
               </div>
             </div>

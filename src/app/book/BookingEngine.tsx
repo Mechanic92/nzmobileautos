@@ -28,6 +28,7 @@ interface PricingResult {
   durationMinutes: number;
   disclaimers: string[];
   breakdown: { key: string; label: string; amountCents: number }[];
+  rawAddOns?: any;
 }
 
 interface SlotData {
@@ -107,6 +108,27 @@ export default function BookingEngine() {
   const goToStep = (s: BookingStep) => {
     setError(null);
     setStep(s);
+  };
+
+  const formatNzTime = (isoOrDate: string | Date) => {
+    const d = typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate;
+    return new Intl.DateTimeFormat("en-NZ", {
+      timeZone: "Pacific/Auckland",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(d);
+  };
+
+  const formatNzDate = (isoOrDate: string | Date) => {
+    const d = typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate;
+    return new Intl.DateTimeFormat("en-NZ", {
+      timeZone: "Pacific/Auckland",
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(d);
   };
 
   const lookupVehicle = async () => {
@@ -584,7 +606,7 @@ export default function BookingEngine() {
                             : "bg-surface border-border hover:border-primary/50"
                         }`}
                       >
-                        {format(new Date(slot.start), "h:mm aa")}
+                        {formatNzTime(slot.start)}
                       </button>
                     ))}
                     {slots.filter(s => s.available).length === 0 && (
@@ -656,7 +678,10 @@ export default function BookingEngine() {
               <div className="p-4 rounded-[10px] bg-surface border border-border space-y-3">
                 <SummaryLine label="Service" value={serviceMode === "DIAGNOSTICS" ? "Diagnostics" : serviceMode === "PPI" ? "Pre-Purchase Inspection" : "Service / Repair"} />
                 <SummaryLine label="Vehicle" value={vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model} (${vehicle.plate})` : "—"} />
-                <SummaryLine label="Date & Time" value={selectedSlot ? format(new Date(selectedSlot.start), "EEE d MMM, h:mm aa") : "—"} />
+                <SummaryLine
+                  label="Date & Time"
+                  value={selectedSlot ? `${formatNzDate(selectedSlot.start)} · ${formatNzTime(selectedSlot.start)}` : "—"}
+                />
                 <SummaryLine label="Location" value={customer.address || "—"} />
                 <SummaryLine label="Contact" value={`${customer.name} · ${customer.phone}`} />
                 <div className="h-px bg-border" />
