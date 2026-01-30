@@ -20,19 +20,29 @@ export type MotorWebIdentity = {
  * Fetches vehicle identity from MotorWeb using mTLS.
  */
 export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWebIdentity> {
-  const passphrase = process.env.MOTORWEB_P12_PASSPHRASE;
+  const passphrase =
+    process.env.MOTORWEB_ROBOT_P12_PASSPHRASE ||
+    process.env.MOTORWEB_P12_PASSPHRASE;
 
   if (!passphrase) {
     throw new Error('MotorWeb mTLS passphrase missing');
   }
 
   let pfx: Buffer;
-  const p12Path = path.join(process.cwd(), 'motorweb.p12');
+  const p12Path =
+    process.env.MOTORWEB_ROBOT_P12_PATH ||
+    process.env.MOTORWEB_P12_PATH ||
+    path.join(process.cwd(), 'motorweb.p12');
 
   if (fs.existsSync(p12Path)) {
     pfx = fs.readFileSync(p12Path);
-  } else if (process.env.MOTORWEB_P12_B64 && process.env.MOTORWEB_P12_B64 !== 'small') {
-    pfx = Buffer.from(process.env.MOTORWEB_P12_B64, 'base64');
+  } else if (
+    (process.env.MOTORWEB_ROBOT_P12_BASE64 && process.env.MOTORWEB_ROBOT_P12_BASE64 !== 'small') ||
+    (process.env.MOTORWEB_P12_B64 && process.env.MOTORWEB_P12_B64 !== 'small')
+  ) {
+    const b64 = process.env.MOTORWEB_ROBOT_P12_BASE64 || process.env.MOTORWEB_P12_B64;
+    if (!b64) throw new Error('MotorWeb mTLS certificate missing');
+    pfx = Buffer.from(b64, 'base64');
   } else {
     throw new Error('MotorWeb mTLS certificate missing');
   }
@@ -58,7 +68,8 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
     throw new Error(`Failed to decrypt P12 with node-forge: ${err.message}`);
   }
 
-  const url = `https://robot.motorweb.co.nz/b2b/chassischeck/generate/4.0?plateOrVin=${encodeURIComponent(plateOrVin)}`;
+  const baseUrl = process.env.MOTORWEB_ROBOT_BASE_URL || 'https://robot.motorweb.co.nz';
+  const url = `${baseUrl}/b2b/chassischeck/generate/4.0?plateOrVin=${encodeURIComponent(plateOrVin)}`;
 
   return new Promise((resolve, reject) => {
     const options = {

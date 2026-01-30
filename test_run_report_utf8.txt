@@ -1,0 +1,42 @@
+﻿node.exe : (node:11808) 
+[DEP0169] 
+DeprecationWarning: 
+`url.parse()` behavior is 
+not standardized and prone 
+to errors that have security 
+implications. Use the WHATWG 
+URL API instead. CVEs are 
+not issued for `url.parse()` 
+vulnerabilities.
+At C:\Program 
+Files\nodejs\pnpm.ps1:16 
+char:5
++     & "$basedir/node$exe"  
+"$basedir/node_modules/corepa
+ck/dist/pnpm. ...
++     ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: ((node:1  
+  1808) [D...ulnerabilitie   
+ s.:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+(Use `node 
+--trace-deprecation ...` to 
+show where the warning was 
+created)
+­ƒÜÇ Starting Full Booking Flow Test
+
+1´©ÅÔâú  Navigating to /instant-quote...
+   Ô£à Page loaded
+
+2´©ÅÔâú  Entering vehicle details...
+
+ÔØî Test failed: No element 
+found for selector: 
+input[placeholder="ABC123 or 
+VIN"]

@@ -1,0 +1,100 @@
+﻿node.exe : (node:18256) 
+[DEP0169] 
+DeprecationWarning: 
+`url.parse()` behavior is 
+not standardized and prone 
+to errors that have security 
+implications. Use the WHATWG 
+URL API instead. CVEs are 
+not issued for `url.parse()` 
+vulnerabilities.
+At C:\Program 
+Files\nodejs\pnpm.ps1:16 
+char:5
++     & "$basedir/node$exe"  
+"$basedir/node_modules/corepa
+ck/dist/pnpm. ...
++     ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: ((node:1  
+  8256) [D...ulnerabilitie   
+ s.:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+(Use `node 
+--trace-deprecation ...` to 
+show where the warning was 
+created)
+
+node:internal/modules/run_mai
+n:107
+    triggerUncaughtException(
+    ^
+Error: Transform failed with 
+1 error:
+C:\nzmobileautos\test_full_fl
+ow.ts:133:6: ERROR: Expected 
+"finally" but found "else"
+    at failureErrorWithLog (C
+:\Users\chris\AppData\Local\p
+npm-cache\dlx\2f054fe2db48e38
+fda188940a98bdc52df0eddf4c49f
+9b4444ace104a9d51636\19c0da10
+42c-38d4\node_modules\.pnpm\e
+sbuild@0.27.2\node_modules\es
+build\lib\main.js:1467:15)
+    at C:\Users\chris\AppData
+\Local\pnpm-cache\dlx\2f054fe
+2db48e38fda188940a98bdc52df0e
+ddf4c49f9b4444ace104a9d51636\
+19c0da1042c-38d4\node_modules
+\.pnpm\esbuild@0.27.2\node_mo
+dules\esbuild\lib\main.js:736
+:50
+    at 
+responseCallbacks.<computed> 
+(C:\Users\chris\AppData\Local
+\pnpm-cache\dlx\2f054fe2db48e
+38fda188940a98bdc52df0eddf4c4
+9f9b4444ace104a9d51636\19c0da
+1042c-38d4\node_modules\.pnpm
+\esbuild@0.27.2\node_modules\
+esbuild\lib\main.js:603:9)
+    at handleIncomingPacket (
+C:\Users\chris\AppData\Local\
+pnpm-cache\dlx\2f054fe2db48e3
+8fda188940a98bdc52df0eddf4c49
+f9b4444ace104a9d51636\19c0da1
+042c-38d4\node_modules\.pnpm\
+esbuild@0.27.2\node_modules\e
+sbuild\lib\main.js:658:12)
+    at Socket.readFromStdout 
+(C:\Users\chris\AppData\Local
+\pnpm-cache\dlx\2f054fe2db48e
+38fda188940a98bdc52df0eddf4c4
+9f9b4444ace104a9d51636\19c0da
+1042c-38d4\node_modules\.pnpm
+\esbuild@0.27.2\node_modules\
+esbuild\lib\main.js:581:7)
+    at Socket.emit 
+(node:events:508:28)
+    at addChunk (node:interna
+l/streams/readable:559:12)
+    at 
+readableAddChunkPushByteMode 
+(node:internal/streams/readab
+le:510:3)
+    at Readable.push (node:in
+ternal/streams/readable:390:5
+)
+    at Pipe.onStreamRead (nod
+e:internal/stream_base_common
+s:189:23) {
+  name: 'TransformError'
+}
+
+Node.js v24.12.0

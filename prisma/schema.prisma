@@ -138,10 +138,10 @@ model ServiceReport {
   type        ServiceReportType
   status      ServiceReportStatus @default(DRAFT)
   /// *
-  ///    * JSON payload for the report (markdown content, structured fields, attachment list, etc.)
+  /// * JSON payload for the report (markdown content, structured fields, attachment list, etc.)
   dataJson    Json
   /// *
-  ///    * Public token used for customer-facing link: /report/[token]
+  /// * Public token used for customer-facing link: /report/[token]
   publicToken String              @unique
   emailedAt   DateTime?
   createdAt   DateTime            @default(now())

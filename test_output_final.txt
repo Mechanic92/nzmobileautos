@@ -1,0 +1,6 @@
+﻿­ƒÜÇ Starting Full Booking Flow Test
+
+1´©ÅÔâú  Navigating to /instant-quote...
+   Ô£à Page loaded
+
+2´©ÅÔâú  Entering vehicle details...

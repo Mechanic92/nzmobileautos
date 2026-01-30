@@ -1,0 +1,39 @@
+﻿node.exe : (node:15704) 
+[DEP0169] 
+DeprecationWarning: 
+`url.parse()` behavior is 
+not standardized and prone 
+to errors that have security 
+implications. Use the WHATWG 
+URL API instead. CVEs are 
+not issued for `url.parse()` 
+vulnerabilities.
+At C:\Program 
+Files\nodejs\pnpm.ps1:16 
+char:5
++     & "$basedir/node$exe"  
+"$basedir/node_modules/corepa
+ck/dist/pnpm. ...
++     ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: ((node:1  
+  5704) [D...ulnerabilitie   
+ s.:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+(Use `node 
+--trace-deprecation ...` to 
+show where the warning was 
+created)
+­ƒÜÇ Starting Full Booking Flow Test
+
+1´©ÅÔâú  Navigating to /instant-quote...
+
+ÔØî Test failed: Waiting for 
+selector 
+`input[placeholder="ABC123 
+or VIN"]` failed

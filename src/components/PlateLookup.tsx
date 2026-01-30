@@ -21,11 +21,9 @@ export default function PlateLookup({ onResult }: PlateLookupProps) {
     try {
       const res = await fetch("/api/identity", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          plate: plate.trim(),
-          email: email.trim(),
-          intent: true,
-          // honeypot: "",
+          plateOrVin: plate.trim(),
         }),
       });
 
