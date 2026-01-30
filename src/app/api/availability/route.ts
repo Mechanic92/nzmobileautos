@@ -58,6 +58,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const dateStr = searchParams.get("date");
   const durationMinutesRaw = searchParams.get("durationMinutes");
+  const debug = searchParams.get("debug") === "1";
 
   if (!dateStr) {
     return NextResponse.json({ error: "Date is required" }, { status: 400 });
@@ -117,6 +118,33 @@ export async function GET(req: NextRequest) {
 
     // 3. Generate Slots
     const slots = generateAvailableSlots(date, occupiedRanges, durationMinutes);
+
+    if (debug) {
+      return NextResponse.json({
+        slots,
+        debug: {
+          commitRef: process.env.COMMIT_REF || null,
+          deployId: process.env.DEPLOY_ID || null,
+          nodeEnv: process.env.NODE_ENV || null,
+          serverTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          nowUtc: new Date().toISOString(),
+          requestDateStr: dateStr,
+          tz,
+          dayStartUtc: dayStartUtc.toISOString(),
+          nextDayStartUtc: nextDayStartUtc.toISOString(),
+          firstSlotStartUtc: slots[0]?.start ? new Date(slots[0].start).toISOString() : null,
+          firstSlotStartNz:
+            slots[0]?.start
+              ? new Intl.DateTimeFormat("en-NZ", {
+                  timeZone: "Pacific/Auckland",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hourCycle: "h23",
+                }).format(new Date(slots[0].start))
+              : null,
+        },
+      });
+    }
 
     return NextResponse.json({ slots });
 
