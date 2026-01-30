@@ -14,7 +14,7 @@ export default function BlogPage() {
   const publishedPosts = BLOG_POSTS.filter(p => p.isPublished);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen">
       {/* Hero Section - Matching the original high-end gradient */}
       <section className="relative overflow-hidden bg-black py-20 lg:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none" />
@@ -100,7 +100,7 @@ export default function BlogPage() {
                 </Button>
               </Link>
               <a href="tel:0276421824">
-                <Button variant="outline" size="lg" className="px-10 py-6 border-border bg-transparent hover:bg-surface2 font-bold text-lg rounded-2xl">
+                <Button variant="secondary" size="lg" className="px-10 py-6 border-border bg-transparent hover:bg-surface2 font-bold text-lg rounded-2xl">
                   Call 027 642 1824
                 </Button>
               </a>

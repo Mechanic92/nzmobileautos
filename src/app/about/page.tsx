@@ -64,7 +64,7 @@ export default function AboutPage() {
         </section>
 
         {/* Story Section */}
-        <section className="py-16 md:py-24 bg-background">
+        <section className="py-16 md:py-24">
           <div className="container">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
@@ -115,7 +115,7 @@ export default function AboutPage() {
         </section>
 
         {/* What We Do */}
-        <section className="py-16 md:py-24 bg-background">
+        <section className="py-16 md:py-24">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
               <Wrench className="h-16 w-16 text-accent mx-auto mb-6" />

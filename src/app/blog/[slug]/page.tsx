@@ -89,7 +89,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen">
       {/* Article Header */}
       <section className="relative overflow-hidden bg-black pt-16 lg:pt-24 pb-16">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />

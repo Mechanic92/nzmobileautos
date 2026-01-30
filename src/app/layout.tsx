@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { cookies } from "next/headers";
 import { adminCookieName, verifyAdminSession } from "@/server/adminSession";
+import { SiteBackground } from "@/components/SiteBackground";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || "https://www.mobileautoworksnz.com"),
@@ -35,7 +36,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body>
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col relative">
+          <SiteBackground />
           <header className="sticky top-0 z-30 border-b border-white/10 bg-black/60 backdrop-blur">
             <div className="container py-4 flex items-center justify-between gap-4">
               <a href="/" className="flex items-center gap-3 no-underline">
@@ -79,8 +81,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </nav>
             </div>
           </header>
-          <main className="flex-1">{children}</main>
-          <footer className="border-t border-white/10">
+          <main className="flex-1 relative z-10">{children}</main>
+          <footer className="border-t border-white/10 relative z-10">
             <div className="container py-10">
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
