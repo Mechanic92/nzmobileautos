@@ -1,7 +1,7 @@
-import { Agent, fetch as undiciFetch } from 'undici';
 import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
 import path from 'path';
+import https from 'https';
 
 export type MotorWebIdentity = {
   make: string;
@@ -17,86 +17,67 @@ export type MotorWebIdentity = {
 
 /**
  * Fetches vehicle identity from MotorWeb using mTLS.
- * Implements timeout (5-8s) and 1-retry logic.
  */
 export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWebIdentity> {
   const passphrase = process.env.MOTORWEB_P12_PASSPHRASE;
 
   if (!passphrase) {
-    throw new Error('MotorWeb mTLS passphrase (MOTORWEB_P12_PASSPHRASE) missing on server');
+    throw new Error('MotorWeb mTLS passphrase missing');
   }
 
   let pfx: Buffer;
   const p12Path = path.join(process.cwd(), 'motorweb.p12');
-  console.log('MotorWeb P12 Path:', p12Path);
-  console.log('MotorWeb P12 Exists:', fs.existsSync(p12Path));
 
   if (fs.existsSync(p12Path)) {
     pfx = fs.readFileSync(p12Path);
-    console.log('Read P12 from file, size:', pfx.length);
   } else if (process.env.MOTORWEB_P12_B64 && process.env.MOTORWEB_P12_B64 !== 'small') {
     pfx = Buffer.from(process.env.MOTORWEB_P12_B64, 'base64');
-    console.log('Read P12 from env, size:', pfx.length);
   } else {
-    const files = fs.readdirSync(process.cwd());
-    throw new Error('MotorWeb mTLS certificate missing. CWD: ' + process.cwd() + ' Files: ' + files.join(', '));
-  }
-
-  let dispatcher;
-  try {
-    dispatcher = new Agent({
-      connect: {
-        pfx,
-        passphrase,
-        servername: 'robot.motorweb.co.nz',
-      },
-    });
-  } catch (e: any) {
-    throw new Error('Failed to create Agent: ' + e.message);
+    throw new Error('MotorWeb mTLS certificate missing');
   }
 
   const url = `https://robot.motorweb.co.nz/b2b/chassischeck/generate/4.0?plateOrVin=${encodeURIComponent(plateOrVin)}`;
 
-  const makeRequest = async () => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
-
-    try {
-      console.log('Sending MotorWeb request with mTLS...');
-      const response = await undiciFetch(url, {
-        method: 'GET',
-        // @ts-ignore
-        dispatcher,
-        signal: controller.signal,
-        headers: {
-          'Accept': 'application/xml',
-          'User-Agent': 'MobileAutoworksNZ/1.0',
-        },
-      });
-      console.log('Received response:', response.status);
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`MotorWeb API error: ${response.status} ${response.statusText}`);
+  return new Promise((resolve, reject) => {
+    const options = {
+      pfx,
+      passphrase,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/xml',
+        'User-Agent': 'MobileAutoworksNZ/1.1',
       }
+    };
 
-      const xmlData = await response.text();
-      return parseMotorWebXml(xmlData);
-    } catch (error: any) {
-      clearTimeout(timeoutId);
-      console.error('Request failed:', error.message);
-      throw error;
-    }
-  };
+    console.log('Requesting MotorWeb via https.request...');
+    const req = https.request(url, options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            resolve(parseMotorWebXml(data));
+          } catch (e) {
+            reject(new Error('Failed to parse MotorWeb XML: ' + (e as Error).message));
+          }
+        } else {
+          reject(new Error(`MotorWeb API error: ${res.statusCode} ${res.statusMessage}. Data: ${data}`));
+        }
+      });
+    });
 
-  // 1-Retry Logic
-  try {
-    return await makeRequest();
-  } catch (err) {
-    console.warn('MotorWeb first attempt failed, retrying...', err);
-    return await makeRequest();
-  }
+    req.on('error', (e) => {
+      console.error('MotorWeb Request Error:', e);
+      reject(e);
+    });
+
+    req.setTimeout(30000, () => {
+      req.destroy();
+      reject(new Error('MotorWeb request timed out'));
+    });
+
+    req.end();
+  });
 }
 
 function parseMotorWebXml(xml: string): MotorWebIdentity {
