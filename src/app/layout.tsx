@@ -44,17 +44,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <div className="text-xs text-white/60">Auckland • Diagnostics • Pre-purchase inspections</div>
                 </div>
               </a>
-              <nav className="text-sm flex items-center gap-3">
+              <nav className="text-sm flex items-center gap-1">
+                <a className="text-white/80 hover:text-white no-underline px-3 py-2 rounded-md hover:bg-white/5 transition-colors" href="/">
+                  Home
+                </a>
+                <a className="text-white/80 hover:text-white no-underline px-3 py-2 rounded-md hover:bg-white/5 transition-colors" href="/#services">
+                  Services
+                </a>
+                <a className="text-white/80 hover:text-white no-underline px-3 py-2 rounded-md hover:bg-white/5 transition-colors" href="/about">
+                  About
+                </a>
+                <a className="text-white/80 hover:text-white no-underline px-3 py-2 rounded-md hover:bg-white/5 transition-colors" href="/contact">
+                  Contact
+                </a>
                 {isAdmin && (
                   <a className="text-white/80 hover:text-white no-underline px-3 py-2 rounded-md hover:bg-white/5" href="/admin">
                     Admin
                   </a>
                 )}
                 <a
-                  className="no-underline px-3 py-2 rounded-md bg-brand-yellow text-black font-semibold hover:bg-brand-yellow/90"
+                  className="no-underline px-4 py-2 rounded-md bg-brand-yellow text-black font-semibold hover:bg-brand-yellow/90 transition-colors ml-2"
                   href="/instant-quote"
                 >
-                  Instant quote
+                  Get Quote
                 </a>
               </nav>
             </div>

@@ -81,7 +81,7 @@ export default function HomePage() {
       </section>
 
       {/* Services Section */}
-      <section className="container space-y-12">
+      <section id="services" className="container space-y-12">
         <div className="text-center space-y-4 max-w-2xl mx-auto">
           <h2 className="text-3xl lg:text-5xl font-bold tracking-tight">Expert Services</h2>
           <p className="text-muted text-lg">
