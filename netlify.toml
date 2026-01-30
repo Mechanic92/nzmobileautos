@@ -2,6 +2,9 @@
   command = "pnpm build"
   publish = ".next"
 
+[functions]
+  included_files = ["motorweb.p12"]
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 

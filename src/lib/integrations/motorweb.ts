@@ -37,7 +37,9 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
     console.log('Using MotorWeb P12 from env variable');
     pfx = Buffer.from(process.env.MOTORWEB_P12_B64, 'base64');
   } else {
-    throw new Error('MotorWeb mTLS certificate missing. Expected file at ' + p12Path);
+    const files = fs.readdirSync(process.cwd());
+    console.error('CWD files:', files);
+    throw new Error('MotorWeb mTLS certificate missing. CWD: ' + process.cwd() + ' Files: ' + files.join(', '));
   }
 
   const dispatcher = new Agent({
