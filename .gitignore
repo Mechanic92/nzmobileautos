@@ -1,6 +1,7 @@
 .next/
 node_modules/
 .vercel/
+.env
 .env*.local
 *.png
 *.html

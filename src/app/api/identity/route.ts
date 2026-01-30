@@ -11,12 +11,48 @@ const lookupSchema = z.object({
   honeypot: z.string().optional(),
 });
 
+function getClientIp(req: NextRequest): string {
+  const headerCandidates = [
+    'x-nf-client-connection-ip',
+    'cf-connecting-ip',
+    'x-real-ip',
+    'x-forwarded-for',
+  ];
+
+  for (const h of headerCandidates) {
+    const v = req.headers.get(h);
+    if (!v) continue;
+
+    if (h === 'x-forwarded-for') {
+      const first = v.split(',')[0]?.trim();
+      if (first) return first;
+      continue;
+    }
+
+    return v.trim();
+  }
+
+  const anyIp = (req as any).ip;
+  if (typeof anyIp === 'string' && anyIp.trim()) return anyIp.trim();
+
+  const ua = req.headers.get('user-agent') || '';
+  const al = req.headers.get('accept-language') || '';
+  return `derived:${createHash('sha256').update(`${ua}|${al}`).digest('hex').slice(0, 16)}`;
+}
+
+function getDailyLimit(envKey: string, defaultValue: number): number {
+  const raw = process.env[envKey];
+  if (!raw) return defaultValue;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : defaultValue;
+}
+
 /**
  * Identity API
  * Entry point for vehicle lookup. Implements caching, rate-limiting, and cost control.
  */
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') || (req as any).ip || '127.0.0.1';
+  const ip = getClientIp(req);
   
   let body;
   try {
@@ -42,7 +78,9 @@ export async function POST(req: NextRequest) {
   const normalizedPlateOrVin = plateOrVin.toUpperCase().replace(/[^A-Z0-9]/g, '');
   const plateHash = createHash('sha256').update(normalizedPlateOrVin).digest('hex');
 
-  // 4. Rate Limiting (20/day per IP, 10/day per fingerprint)
+  // 4. Rate Limiting (defaults: 20/day per IP, 10/day per fingerprint)
+  const ipDailyLimit = getDailyLimit('IDENTITY_IP_DAILY_LIMIT', 20);
+  const fingerprintDailyLimit = getDailyLimit('IDENTITY_FINGERPRINT_DAILY_LIMIT', 10);
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
 
@@ -50,7 +88,7 @@ export async function POST(req: NextRequest) {
     where: { ip, createdAt: { gte: startOfDay } },
   });
 
-  if (ipCount >= 20) {
+  if (ipCount >= ipDailyLimit) {
     return NextResponse.json({ error: 'Direct lookup limit reached. Please contact support.' }, { status: 429 });
   }
 
@@ -58,7 +96,7 @@ export async function POST(req: NextRequest) {
     const fpCount = await prisma.lookupLog.count({
       where: { fingerprint, createdAt: { gte: startOfDay } },
     });
-    if (fpCount >= 10) {
+    if (fpCount >= fingerprintDailyLimit) {
       return NextResponse.json({ error: 'Device lookup limit reached.' }, { status: 429 });
     }
   }
