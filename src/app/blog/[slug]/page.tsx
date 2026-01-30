@@ -1,5 +1,5 @@
 
-import { ArrowLeft, Calendar, Tag, MessageSquare, Clock, User, Share2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Tag, MessageSquare, Clock, User, Share2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BLOG_POSTS } from "@/lib/blog-data";
