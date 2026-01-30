@@ -30,8 +30,10 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
 
   if (fs.existsSync(p12Path)) {
     pfx = fs.readFileSync(p12Path);
+    console.log('PFX Hex (File):', pfx.slice(0, 4).toString('hex'));
   } else if (process.env.MOTORWEB_P12_B64 && process.env.MOTORWEB_P12_B64 !== 'small') {
     pfx = Buffer.from(process.env.MOTORWEB_P12_B64, 'base64');
+    console.log('PFX Hex (Env):', pfx.slice(0, 4).toString('hex'));
   } else {
     throw new Error('MotorWeb mTLS certificate missing');
   }

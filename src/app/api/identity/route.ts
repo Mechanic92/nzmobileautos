@@ -155,7 +155,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ 
       error: 'Vehicle not found or provider unreachable',
       debug: error.message,
-      stack: error.stack
+      stack: error.stack,
+      nodeVersion: process.version,
+      cwd: process.cwd(),
     }, { status: 502 });
   }
 }
