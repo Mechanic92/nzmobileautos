@@ -4,3 +4,15 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/booking"
+  to = "/book"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/booking/"
+  to = "/book"
+  status = 301
+  force = true

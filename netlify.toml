@@ -7,3 +7,15 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/booking"
+  to = "/book"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/booking/"
+  to = "/book"
+  status = 301
+  force = true
