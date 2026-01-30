@@ -1,14 +1,16 @@
+﻿import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Footer from "./Footer";
+import Header from "./Header";
 import { Award, CheckCircle, Clock, Heart, MapPin, Phone, Shield, Star, Users, Wrench } from "lucide-react";
-import Link from "next/link";
+import { Link } from "wouter";
+import { appPortalUrl } from "@/const";
+import Seo from "./Seo";
 
-export const metadata = {
-  title: "About Us | Trusted Mobile Mechanic West Auckland",
-  description: "Learn more about Mobile Autoworks NZ. We are dedicated to providing honest, transparent, and high-quality mobile mechanical services across Auckland.",
-};
-
+// Professional mechanic story image
 const storyImageUrl = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&q=80&w=1000";
 
-export default function AboutPage() {
+export default function About() {
   const values = [
     {
       icon: Shield,
@@ -47,15 +49,21 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Seo
+        title="About Us | Trusted Mobile Mechanic West Auckland"
+        description="Learn more about Mobile Autoworks NZ. We are dedicated to providing honest, transparent, and high-quality mobile mechanical services across Auckland."
+      />
+      <Header />
+
       <main className="flex-1">
         {/* Hero */}
-        <section className="relative bg-gradient-to-br from-primary to-yellow-600 text-black py-16 md:py-24">
+        <section className="relative bg-gradient-to-br from-primary to-secondary text-primary-foreground py-16 md:py-24">
           <div className="container">
             <div className="max-w-3xl">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
                 About Mobile Autoworks NZ
               </h1>
-              <p className="text-lg md:text-xl text-black/90">
+              <p className="text-lg md:text-xl text-primary-foreground/90">
                 Your trusted mobile mechanic serving West Auckland with professional diagnostics, repairs, and WOF remedial work after inspection.
               </p>
             </div>
@@ -75,10 +83,10 @@ export default function AboutPage() {
                     <strong>Mobile Autoworks NZ</strong> was founded by Chris, a trade-qualified mechanic with a passion for excellence and a vision to redefine automotive service in Auckland. We understand that your time is your most valuable asset, and that taking your vehicle to a traditional workshop is a disruption you don't need.
                   </p>
                   <p>
-                    Chris brings over 15 years of hands-on experience across the automotive spectrum—from prestige European cars and everyday family vehicles to heavy-duty 4x4s and commercial fleets. Unlike many mobile services, Chris invests in the same high-end diagnostic technology used by main dealers, ensuring we find the root cause of issues, not just the symptoms.
+                    Chris brings over 15 years of hands-on experience across the automotive spectrumÔÇöfrom prestige European cars and everyday family vehicles to heavy-duty 4x4s and commercial fleets. Unlike many mobile services, Chris invests in the same high-end diagnostic technology used by main dealers, ensuring we find the root cause of issues, not just the symptoms.
                   </p>
                   <p>
-                    Today, Mobile Autoworks is the go-to choice for West Auckland professionals who demand the highest standards of workmanship and the ultimate convenience of on-site service. Every job Chris performs is backed by a commitment to total transparency—meaning you'll always know exactly what's being done and why.
+                    Today, Mobile Autoworks is the go-to choice for West Auckland professionals who demand the highest standards of workmanship and the ultimate convenience of on-site service. Every job Chris performs is backed by a commitment to total transparencyÔÇömeaning you'll always know exactly what's being done and why.
                   </p>
                 </div>
               </div>
@@ -101,13 +109,15 @@ export default function AboutPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {values.map((value, index) => (
-                <div key={index} className="border-2 hover:border-accent transition-colors rounded-lg bg-card p-6">
-                  <value.icon className="h-12 w-12 text-accent mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">
-                    {value.title}
-                  </h3>
-                  <p className="text-muted-foreground">{value.description}</p>
-                </div>
+                <Card key={index} className="border-2 hover:border-accent transition-colors">
+                  <CardContent className="pt-6">
+                    <value.icon className="h-12 w-12 text-accent mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">
+                      {value.title}
+                    </h3>
+                    <p className="text-muted-foreground">{value.description}</p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
@@ -135,9 +145,7 @@ export default function AboutPage() {
                 ))}
               </div>
               <Link href="/services">
-                <button className="inline-flex items-center justify-center px-8 py-4 bg-black text-white font-bold hover:bg-black/90 transition-all rounded-md">
-                  View All Services
-                </button>
+                <Button size="lg">View All Services</Button>
               </Link>
             </div>
           </div>
@@ -155,49 +163,57 @@ export default function AboutPage() {
                 Our team brings years of hands-on experience working with all vehicle makes and models. We stay current with the latest automotive technology and diagnostic techniques to provide you with expert service every time.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                <div className="bg-card rounded-lg p-6">
-                  <div className="text-4xl font-bold text-accent mb-2">15+</div>
-                  <p className="text-muted-foreground">Years Experience</p>
-                </div>
-                <div className="bg-card rounded-lg p-6">
-                  <div className="text-4xl font-bold text-accent mb-2">500+</div>
-                  <p className="text-muted-foreground">Happy Customers</p>
-                </div>
-                <div className="bg-card rounded-lg p-6">
-                  <div className="text-4xl font-bold text-accent mb-2">100%</div>
-                  <p className="text-muted-foreground">Satisfaction Rate</p>
-                </div>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-4xl font-bold text-accent mb-2">10+</div>
+                    <p className="text-muted-foreground">Years Experience</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-4xl font-bold text-accent mb-2">500+</div>
+                    <p className="text-muted-foreground">Happy Customers</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-4xl font-bold text-accent mb-2">100%</div>
+                    <p className="text-muted-foreground">Satisfaction Rate</p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
         </section>
 
         {/* CTA */}
-        <section className="py-16 md:py-24 bg-primary text-black">
+        <section className="py-16 md:py-24 bg-primary text-primary-foreground">
           <div className="container text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Ready to Experience the Difference?
             </h2>
-            <p className="text-lg mb-8 text-black/90 max-w-2xl mx-auto">
+            <p className="text-lg mb-8 text-primary-foreground/90 max-w-2xl mx-auto">
               Get in touch today for professional mobile mechanical services you can trust.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/instant-quote"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg bg-black text-white font-bold hover:bg-black/90 transition-all rounded-md"
-              >
-                Get a Quote
+              <Link href="/quote">
+                <a>
+                  <Button size="lg" variant="secondary" className="text-lg px-8">
+                    Get a Quote
+                  </Button>
+                </a>
               </Link>
-              <a
-                href="tel:0276421824"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg bg-transparent text-black border-2 border-black hover:bg-black hover:text-white font-medium transition-all rounded-md"
-              >
-                Call 027 642 1824
+              <a href="tel:0276421824">
+                <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                  Call 027 642 1824
+                </Button>
               </a>
             </div>
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 }
