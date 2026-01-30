@@ -1,5 +1,7 @@
 import { Agent, fetch as undiciFetch } from 'undici';
 import { XMLParser } from 'fast-xml-parser';
+import fs from 'fs';
+import path from 'path';
 
 export type MotorWebIdentity = {
   make: string;
@@ -18,14 +20,23 @@ export type MotorWebIdentity = {
  * Implements timeout (5-8s) and 1-retry logic.
  */
 export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWebIdentity> {
-  const p12Base64 = process.env.MOTORWEB_P12_B64;
   const passphrase = process.env.MOTORWEB_P12_PASSPHRASE;
 
-  if (!p12Base64 || !passphrase) {
-    throw new Error('MotorWeb mTLS credentials (MOTORWEB_P12_B64/PASSPHRASE) missing on server');
+  if (!passphrase) {
+    throw new Error('MotorWeb mTLS passphrase (MOTORWEB_P12_PASSPHRASE) missing on server');
   }
 
-  const pfx = Buffer.from(p12Base64, 'base64');
+  let pfx: Buffer;
+  const p12Path = path.join(process.cwd(), 'src/lib/integrations/motorweb.p12');
+
+  if (fs.existsSync(p12Path)) {
+    pfx = fs.readFileSync(p12Path);
+  } else if (process.env.MOTORWEB_P12_B64) {
+    pfx = Buffer.from(process.env.MOTORWEB_P12_B64, 'base64');
+  } else {
+    throw new Error('MotorWeb mTLS certificate missing. Expected file at src/lib/integrations/motorweb.p12');
+  }
+
   const dispatcher = new Agent({
     connect: {
       pfx,
