@@ -1,14 +1,18 @@
+﻿import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Footer from "./Footer";
+import Header from "./Header";
 import { Award, CheckCircle, Clock, MapPin, Phone, Shield, Star, Wrench } from "lucide-react";
-import Link from "next/link";
+import { Link } from "wouter";
+import { COMPANY_INFO } from "@/const";
+import Seo from "./Seo";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-export const metadata = {
-  title: "Mobile Mechanic Auckland | Mobile Diagnostics Auckland",
-  description: "Mobile mechanic Auckland. Mobile diagnostics Auckland, servicing and repairs across Central Auckland, West Auckland and the North Shore. Call or text 027 642 1824.",
-};
-
+// Professional mobile mechanic hero image
 const heroImageUrl = "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&q=80&w=2000";
 
-export default function HomePage() {
+export default function Home() {
+
   const benefits = [
     {
       icon: Clock,
@@ -62,7 +66,7 @@ export default function HomePage() {
     },
     {
       q: "Do you carry out WOF inspections?",
-      a: "No, we do not perform the inspection itself. We specialize in 'WOF Remedial Repairs'—fixing the faults found during your official inspection so your vehicle can pass its re-check without you needing to leave home."
+      a: "No, we do not perform the inspection itself. We specialize in 'WOF Remedial Repairs'ÔÇöfixing the faults found during your official inspection so your vehicle can pass its re-check without you needing to leave home."
     },
     {
       q: "How much does a mobile diagnostic scan cost?",
@@ -74,8 +78,71 @@ export default function HomePage() {
     }
   ];
 
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.q,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.a
+      }
+    }))
+  };
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Mobile Autoworks NZ",
+    "image": heroImageUrl,
+    "@id": "https://www.mobileautoworksnz.com",
+    "url": "https://www.mobileautoworksnz.com",
+    "telephone": "027 642 1824",
+    "priceRange": "$$",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Mobile Service",
+      "addressLocality": "West Auckland",
+      "addressRegion": "Auckland",
+      "addressCountry": "NZ"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -36.8485,
+      "longitude": 174.6333
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+      ],
+      "opens": "08:00",
+      "closes": "18:00"
+    },
+    "areaServed": [
+      { "@type": "City", "name": "West Auckland" },
+      { "@type": "City", "name": "North Shore" }
+    ],
+    "description": "Professional mobile mechanic in Auckland providing diagnostics, servicing, and repairs at your home or workplace."
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      <Seo
+        title="Mobile Mechanic Auckland | Mobile Diagnostics Auckland"
+        description="Mobile mechanic Auckland. Mobile diagnostics Auckland, servicing and repairs across Central Auckland, West Auckland and the North Shore. Call or text 027 642 1824."
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
+      <Header />
+
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-black text-white">
@@ -89,7 +156,7 @@ export default function HomePage() {
             <div className="max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs text-white/80">
                 <MapPin className="h-4 w-4 text-primary" />
-                Mobile mechanic Auckland – Central Auckland, West Auckland, North Shore
+                Mobile mechanic Auckland ÔÇô Central Auckland, West Auckland, North Shore
               </div>
 
               <h1 className="mt-6 text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight">
@@ -103,7 +170,7 @@ export default function HomePage() {
               </p>
 
               <div className="mt-8 rounded-md border border-white/15 bg-white/5 p-5">
-                <div className="text-lg font-bold">Breakdown Assistance – Auckland</div>
+                <div className="text-lg font-bold">Breakdown Assistance ÔÇô Auckland</div>
                 <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-white/85">
                   <div>1. No-start / flat battery</div>
                   <div>2. Warning lights</div>
@@ -112,22 +179,22 @@ export default function HomePage() {
                 </div>
                 <div className="mt-4 text-sm">
                   For breakdown assistance, call or text{' '}
-                  <a href="tel:0276421824" className="font-bold underline">027 642 1824</a>
+                  <a href="tel:0276421824" className="font-bold underline">{COMPANY_INFO.phone}</a>
                 </div>
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center uppercase tracking-wider">
-                <Link
-                  href="/instant-quote"
-                  className="inline-flex items-center justify-center px-8 py-4 text-base md:text-lg bg-primary hover:bg-primary/90 text-black font-bold transition-all"
-                >
-                  Book Online (Instant Confirmation)
+                <Link href="/booking">
+                  <a>
+                    <Button size="lg" className="text-base md:text-lg px-8 bg-accent hover:bg-accent/90 text-white font-bold rounded-none">
+                      Book Online (Instant Confirmation)
+                    </Button>
+                  </a>
                 </Link>
-                <Link
-                  href="/services"
-                  className="inline-flex items-center justify-center px-8 py-4 text-base md:text-lg border border-white/30 hover:bg-white/10 text-white font-medium transition-all"
-                >
-                  View Services
+                <Link href="/quote">
+                  <Button size="lg" variant="outline" className="text-base md:text-lg px-8 rounded-none">
+                    Quote request
+                  </Button>
                 </Link>
                 <a href="tel:0276421824" className="flex items-center gap-3 px-4 py-2 bg-white/5 hover:bg-white/10 transition-colors border border-white/20">
                   <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
@@ -191,16 +258,18 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {benefits.map((benefit, index) => (
-                <div
+                <Card
                   key={index}
-                  className="text-center border border-white/10 bg-[#0a0a0a] hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition-shadow rounded-lg p-6"
+                  className="text-center border-white/10 bg-[#0a0a0a] hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition-shadow"
                 >
-                  <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center">
-                    <benefit.icon className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">{benefit.title}</h3>
-                  <p className="text-white/70">{benefit.description}</p>
-                </div>
+                  <CardHeader>
+                    <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center">
+                      <benefit.icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">{benefit.title}</CardTitle>
+                    <CardDescription className="text-white/70">{benefit.description}</CardDescription>
+                  </CardHeader>
+                </Card>
               ))}
             </div>
           </div>
@@ -219,21 +288,20 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {services.map((service, index) => (
-                <div key={index} className="bg-white border border-black/10 hover:border-primary transition-colors shadow-sm rounded-lg p-6">
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
-                    <service.icon className="h-6 w-6 text-black" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{service.title}</h3>
-                  <p className="text-sm text-black/70">{service.description}</p>
-                </div>
+                <Card key={index} className="bg-white border-black/10 hover:border-primary transition-colors shadow-sm">
+                  <CardContent className="pt-6">
+                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+                      <service.icon className="h-6 w-6 text-black" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">{service.title}</h3>
+                    <p className="text-sm text-black/70">{service.description}</p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
             <div className="text-center">
-              <Link
-                href="/services"
-                className="inline-flex items-center justify-center px-10 py-4 bg-black text-white font-bold hover:bg-black/90 transition-all rounded-md"
-              >
-                View All Services
+              <Link href="/services">
+                <Button size="lg" className="px-10">View All Services</Button>
               </Link>
             </div>
           </div>
@@ -257,7 +325,7 @@ export default function HomePage() {
                 },
                 {
                   name: "Sarah L.",
-                  location: "Te Atatū Peninsula",
+                  location: "Te Atat┼½ Peninsula",
                   text: "So much easier than dropping my car at a workshop. He fixed my WOF failure items in my own driveway while I worked from home. Professional, honest, and very reasonable.",
                 },
                 {
@@ -266,16 +334,20 @@ export default function HomePage() {
                   text: "Found a major issue during a pre-purchase inspection that saved me thousands. His report was thorough and he talk me through every detail. Cannot recommend enough.",
                 }
               ].map((testimonial, i) => (
-                <div key={i} className="border border-white/10 bg-[#0a0a0a] hover:border-primary/50 transition-colors rounded-lg p-6">
-                  <div className="flex items-center gap-1 mb-4">
-                    {Array.from({ length: 5 }).map((_, j) => (
-                      <Star key={j} className="h-4 w-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <h3 className="text-lg font-bold mb-1">{testimonial.name}</h3>
-                  <p className="text-sm text-white/70 mb-4">{testimonial.location}</p>
-                  <p className="text-white/75 italic">"{testimonial.text}"</p>
-                </div>
+                <Card key={i} className="border-white/10 bg-[#0a0a0a] hover:border-primary/50 transition-colors">
+                  <CardHeader>
+                    <div className="flex items-center gap-1 mb-2">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <Star key={j} className="h-4 w-4 fill-primary text-primary" />
+                      ))}
+                    </div>
+                    <CardTitle className="text-lg">{testimonial.name}</CardTitle>
+                    <CardDescription className="text-white/70">{testimonial.location}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-white/75 italic">"{testimonial.text}"</p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
@@ -298,11 +370,23 @@ export default function HomePage() {
                 "West Auckland",
                 "North Shore",
               ].map((area) => (
-                <div key={area} className="inline-flex items-center gap-2 h-10 px-6 rounded-full border border-black/15 bg-white text-black hover:bg-black hover:text-white transition-colors font-medium">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span>{area}</span>
+                <div key={area} className="">
+                  <Button
+                    variant="outline"
+                    className="h-10 rounded-full border-black/15 bg-white text-black hover:bg-black hover:text-white"
+                  >
+                    <MapPin className="mr-2 h-4 w-4 text-primary" />
+                    <span className="font-medium">{area}</span>
+                  </Button>
                 </div>
               ))}
+            </div>
+            <div className="text-center">
+              <Link href="/areas">
+                <Button variant="outline" size="lg" className="border-black/20 text-black hover:bg-black hover:text-white">
+                  View Coverage Map
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -316,18 +400,17 @@ export default function HomePage() {
                 Everything you need to know about our mobile mechanical services.
               </p>
             </div>
-            <div className="max-w-3xl mx-auto space-y-4">
-              {faqs.map((faq, i) => (
-                <details key={i} className="group border border-black/10 rounded-lg p-6 bg-white hover:border-primary/50 transition-colors">
-                  <summary className="font-semibold cursor-pointer list-none flex items-center justify-between">
-                    {faq.q}
-                    <span className="text-primary text-2xl group-open:rotate-45 transition-transform">+</span>
-                  </summary>
-                  <p className="mt-4 text-black/70 leading-relaxed">
-                    {faq.a}
-                  </p>
-                </details>
-              ))}
+            <div className="max-w-3xl mx-auto">
+              <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq: { q: string; a: string }, i: number) => (
+                  <AccordionItem key={i} value={`item-${i}`}>
+                    <AccordionTrigger className="text-left font-semibold">{faq.q}</AccordionTrigger>
+                    <AccordionContent className="text-black/70 leading-relaxed">
+                      {faq.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
           </div>
         </section>
@@ -341,24 +424,22 @@ export default function HomePage() {
                 Tell us what's going on and we'll confirm scope before any major work.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/instant-quote"
-                  className="inline-flex items-center justify-center px-10 py-4 text-lg bg-primary text-black font-bold hover:bg-primary/90 transition-all rounded-md"
-                >
-                  Get Instant Quote
+                <Link href="/quote">
+                  <Button size="lg" className="text-lg px-10">Quote request</Button>
                 </Link>
-                <a
-                  href="tel:0276421824"
-                  className="inline-flex items-center justify-center gap-2 px-10 py-4 text-lg border border-white/30 hover:bg-white/10 text-white font-medium transition-all rounded-md"
-                >
-                  <Phone className="h-5 w-5" />
-                  Call Now
+                <a href="tel:0276421824">
+                  <Button size="lg" variant="outline" className="text-lg px-10">
+                    <Phone className="mr-2 h-5 w-5" />
+                    Call Now
+                  </Button>
                 </a>
               </div>
             </div>
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 }
