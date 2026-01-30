@@ -150,6 +150,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ error: 'Vehicle not found or provider unreachable' }, { status: 502 });
+    return NextResponse.json({ 
+      error: 'Vehicle not found or provider unreachable',
+      debug: error.message,
+      stack: error.stack
+    }, { status: 502 });
   }
 }
