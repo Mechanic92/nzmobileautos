@@ -48,7 +48,7 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
       connect: {
         pfx,
         passphrase,
-        rejectUnauthorized: false, // Testing only - will revert after verification
+        servername: 'robot.motorweb.co.nz',
       },
     });
   } catch (e: any) {
@@ -62,12 +62,15 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
     try {
-      console.log('Sending MotorWeb request (testing without dispatcher)...');
-      const response = await fetch(url, {
+      console.log('Sending MotorWeb request with mTLS...');
+      const response = await undiciFetch(url, {
         method: 'GET',
+        // @ts-ignore
+        dispatcher,
         signal: controller.signal,
         headers: {
           'Accept': 'application/xml',
+          'User-Agent': 'MobileAutoworksNZ/1.0',
         },
       });
       console.log('Received response:', response.status);
