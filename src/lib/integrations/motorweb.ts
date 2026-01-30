@@ -33,21 +33,27 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
 
   if (fs.existsSync(p12Path)) {
     pfx = fs.readFileSync(p12Path);
+    console.log('Read P12 from file, size:', pfx.length);
   } else if (process.env.MOTORWEB_P12_B64 && process.env.MOTORWEB_P12_B64 !== 'small') {
-    console.log('Using MotorWeb P12 from env variable');
     pfx = Buffer.from(process.env.MOTORWEB_P12_B64, 'base64');
+    console.log('Read P12 from env, size:', pfx.length);
   } else {
     const files = fs.readdirSync(process.cwd());
-    console.error('CWD files:', files);
     throw new Error('MotorWeb mTLS certificate missing. CWD: ' + process.cwd() + ' Files: ' + files.join(', '));
   }
 
-  const dispatcher = new Agent({
-    connect: {
-      pfx,
-      passphrase,
-    },
-  });
+  let dispatcher;
+  try {
+    dispatcher = new Agent({
+      connect: {
+        pfx,
+        passphrase,
+        rejectUnauthorized: false, // Testing only - will revert after verification
+      },
+    });
+  } catch (e: any) {
+    throw new Error('Failed to create Agent: ' + e.message);
+  }
 
   const url = `https://robot.motorweb.co.nz/b2b/chassischeck/generate/4.0?plateOrVin=${encodeURIComponent(plateOrVin)}`;
 
