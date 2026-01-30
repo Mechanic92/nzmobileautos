@@ -28,6 +28,7 @@ NODE_VERSION = "20"
 [functions]
 
 [functions."*"]
+included_files = ["motorweb.p12"]
 
 [[plugins]]
 origin = "config"
