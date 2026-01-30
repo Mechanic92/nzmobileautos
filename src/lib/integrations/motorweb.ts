@@ -1,3 +1,4 @@
+import forge from 'node-forge';
 import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
 import path from 'path';
@@ -30,24 +31,43 @@ export async function fetchMotorWebIdentity(plateOrVin: string): Promise<MotorWe
 
   if (fs.existsSync(p12Path)) {
     pfx = fs.readFileSync(p12Path);
-    console.log('PFX Hex (File):', pfx.slice(0, 4).toString('hex'));
   } else if (process.env.MOTORWEB_P12_B64 && process.env.MOTORWEB_P12_B64 !== 'small') {
     pfx = Buffer.from(process.env.MOTORWEB_P12_B64, 'base64');
-    console.log('PFX Hex (Env):', pfx.slice(0, 4).toString('hex'));
   } else {
     throw new Error('MotorWeb mTLS certificate missing');
+  }
+
+  // Use node-forge to handle legacy PKCS12 encryption
+  let keyPem: string;
+  let certPem: string;
+  try {
+    const p12Der = pfx.toString('binary');
+    const p12Asn1 = forge.asn1.fromDer(p12Der);
+    const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, false, passphrase);
+
+    const keyBags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
+    const keyBag = keyBags[forge.pki.oids.pkcs8ShroudedKeyBag]?.[0];
+    if (!keyBag) throw new Error('No key bag found in P12');
+    keyPem = forge.pki.privateKeyToPem(keyBag.key);
+
+    const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
+    const certBag = certBags[forge.pki.oids.certBag]?.[0];
+    if (!certBag) throw new Error('No cert bag found in P12');
+    certPem = forge.pki.certificateToPem(certBag.cert);
+  } catch (err: any) {
+    throw new Error(`Failed to decrypt P12 with node-forge: ${err.message}`);
   }
 
   const url = `https://robot.motorweb.co.nz/b2b/chassischeck/generate/4.0?plateOrVin=${encodeURIComponent(plateOrVin)}`;
 
   return new Promise((resolve, reject) => {
     const options = {
-      pfx,
-      passphrase,
+      key: keyPem,
+      cert: certPem,
       method: 'GET',
       headers: {
         'Accept': 'application/xml',
-        'User-Agent': 'MobileAutoworksNZ/1.1',
+        'User-Agent': 'MobileAutoworksNZ/1.2',
       }
     };
 

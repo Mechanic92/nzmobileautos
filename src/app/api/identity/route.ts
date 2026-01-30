@@ -46,7 +46,6 @@ export async function POST(req: NextRequest) {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
 
-  /*
   const ipCount = await prisma.lookupLog.count({
     where: { ip, createdAt: { gte: startOfDay } },
   });
@@ -63,7 +62,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Device lookup limit reached.' }, { status: 429 });
     }
   }
-  */
 
   try {
     // 5. Cache-First Strategy (90 day TTL)
@@ -152,12 +150,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ 
-      error: 'Vehicle not found or provider unreachable',
-      debug: error.message,
-      stack: error.stack,
-      nodeVersion: process.version,
-      cwd: process.cwd(),
-    }, { status: 502 });
+    return NextResponse.json({ error: 'Vehicle not found or provider unreachable' }, { status: 502 });
   }
 }
