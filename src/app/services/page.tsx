@@ -1,83 +1,193 @@
-import { Check, Shield, Clock, MapPin, Zap } from "lucide-react";
+import Link from "next/link";
+
+import { Check, Clock, MapPin, Search, Settings, Shield, Sparkles, Wrench, Zap } from "lucide-react";
 
 export const metadata = {
-  title: "Services & Pricing",
-  description: "Professional mobile mechanic services in Auckland. Diagnostics, pre-purchase inspections, and comprehensive servicing packages. Fixed pricing, same-day reports.",
+  title: "Mobile Mechanic Services Auckland | Diagnostics, Pre-Purchase Inspections & Servicing",
+  description:
+    "Premium mobile mechanic services across Auckland. Fixed-price diagnostics, detailed pre-purchase inspections, and quality servicing at your home or workplace. Book online in minutes.",
+  keywords: [
+    "mobile mechanic auckland",
+    "car diagnostics auckland",
+    "pre purchase inspection auckland",
+    "mobile car service",
+    "vehicle inspection auckland",
+    "west auckland mechanic",
+  ],
+  alternates: {
+    canonical: "/services",
+  },
 };
+
+const SERVICES = [
+  {
+    intent: "DIAGNOSTICS" as const,
+    icon: <Wrench className="w-6 h-6" />,
+    title: "Diagnostics (Fixed Price)",
+    price: "$140",
+    lead:
+      "Ideal for warning lights, rough running, no-start issues, or intermittent faults. We use professional scan tools to find the root cause — not guess.",
+    bullets: [
+      "Full OBD2 scan + clear (where appropriate)",
+      "Live data review and fault isolation",
+      "Clear explanation of next steps",
+      "Written diagnostic notes",
+    ],
+  },
+  {
+    intent: "PPI" as const,
+    icon: <Search className="w-6 h-6" />,
+    title: "Pre-Purchase Inspection",
+    price: "$180",
+    lead:
+      "Buying privately or from a dealer? Get a professional assessment before you commit. Designed to surface costly surprises early.",
+    bullets: [
+      "100+ point inspection across major systems",
+      "Road test (where possible)",
+      "Photos of issues and risk items",
+      "Clear pass/concern summary",
+    ],
+    badge: "Most popular",
+  },
+  {
+    intent: "SERVICE" as const,
+    icon: <Settings className="w-6 h-6" />,
+    title: "Servicing & Maintenance",
+    price: "From $149",
+    lead:
+      "On-site servicing that keeps your car reliable and protects resale value. We tailor the service level to your vehicle and usage.",
+    bullets: [
+      "Oil + filter options",
+      "Safety checks and consumables review",
+      "Service light resets (where supported)",
+      "Maintenance plan guidance",
+    ],
+  },
+];
+
+const FAQS = [
+  {
+    q: "What areas do you cover?",
+    a: "We service Auckland. Most bookings are in West Auckland, North Shore, and Central. If you’re unsure, request an instant quote and we’ll confirm coverage.",
+  },
+  {
+    q: "Do you do WOF inspections?",
+    a: "No — we do WOF remedial repairs only (fixing faults identified by the official inspection).",
+  },
+  {
+    q: "How fast can I book?",
+    a: "You can select a time slot and pay online to secure the booking. The checkout confirms instantly.",
+  },
+  {
+    q: "Is pricing fixed?",
+    a: "Diagnostics and inspections are fixed-price. For servicing/repairs, you’ll receive a quote based on your vehicle and requirements.",
+  },
+];
 
 export default function ServicesPage() {
   return (
-    <div className="flex flex-col gap-16 pb-24">
-      {/* Hero Section */}
+    <div className="flex flex-col pb-24">
       <section className="container pt-12 lg:pt-20">
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
-              <Zap className="w-4 h-4" />
-              <span>Auckland's #1 Mobile Mechanic</span>
+        <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
+          <div className="lg:col-span-7 space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Premium mobile mechanic services — Auckland
             </div>
-            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-tight">
-              Pro Car Care. <br />
-              <span className="text-primary">At Your Door.</span>
+
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
+              Services & pricing that feel
+              <span className="text-primary"> effortless</span>.
             </h1>
-            <p className="text-xl text-muted max-w-xl leading-relaxed">
-              Skip the workshop. We provide expert mobile diagnostics, pre-purchase inspections, and quality servicing across Auckland. Professional reports, fixed pricing, and easy online booking.
+
+            <p className="text-lg md:text-xl text-muted max-w-2xl leading-relaxed">
+              Choose the service you need, get a clear price, and secure a time slot online. We come to your home or workplace —
+              no workshop drop-offs, no waiting rooms.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <a
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-primary text-primaryText font-bold text-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <Link
                 href="/instant-quote"
+                className="no-underline inline-flex items-center justify-center px-8 py-4 rounded-xl bg-primary text-primaryText font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
               >
-                Get Instant Quote
-              </a>
-              <a 
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-border bg-surface hover:bg-surface2 text-text font-bold text-lg transition-all" 
+                Get instant quote
+              </Link>
+              <Link
                 href="/book"
+                className="no-underline inline-flex items-center justify-center px-8 py-4 rounded-xl border border-border bg-surface hover:bg-surface2 text-text font-bold text-lg transition-colors"
               >
-                Book Now
-              </a>
+                Book a time slot
+              </Link>
             </div>
-            
-            <div className="flex flex-wrap gap-6 pt-6 text-sm text-muted">
-              <div className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" />
-                <span>Fully Insured</span>
+
+            <div className="grid gap-3 sm:grid-cols-3 pt-4 text-sm">
+              <div className="rounded-[14px] border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Shield className="w-4 h-4 text-primary" />
+                  Fully insured
+                </div>
+                <div className="mt-1 text-white/70">Professional, accountable work.</div>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-primary" />
-                <span>Same Day Reports</span>
+              <div className="rounded-[14px] border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Clock className="w-4 h-4 text-primary" />
+                  Fast turnaround
+                </div>
+                <div className="mt-1 text-white/70">Clear next steps, same-day where possible.</div>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-primary" />
-                <span>MTA Standards</span>
+              <div className="rounded-[14px] border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Check className="w-4 h-4 text-primary" />
+                  No surprises
+                </div>
+                <div className="mt-1 text-white/70">Transparent scope and pricing.</div>
               </div>
             </div>
           </div>
 
-          <div className="relative group">
-            <div className="absolute -inset-4 bg-primary/20 rounded-[2rem] blur-2xl group-hover:bg-primary/30 transition-all duration-500" />
-            <div className="relative rounded-2xl border border-border bg-surface p-8 shadow-2xl">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold">Why Mobile?</h3>
-                  <div className="p-2 rounded-lg bg-primary/20">
-                    <Clock className="w-6 h-6 text-primary" />
-                  </div>
+          <div className="lg:col-span-5">
+            <div className="rounded-[22px] border border-border bg-surface p-6 shadow-2xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-widest text-muted">How booking works</div>
+                  <div className="mt-2 text-2xl font-bold">3 steps. Fully online.</div>
                 </div>
-                <div className="space-y-4">
-                  {[
-                    "No more taking time off work",
-                    "Watch the work being done at your home",
-                    "Expert advice directly from the mechanic",
-                    "Flat rate call-out fees across Auckland",
-                  ].map((benefit, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                        <Check className="w-4 h-4 text-primary" />
-                      </div>
-                      <span className="text-muted">{benefit}</span>
+                <div className="rounded-xl bg-primary/15 border border-primary/30 p-3 text-primary">
+                  <Zap className="w-6 h-6" />
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-4 text-sm">
+                {[{
+                  n: "01",
+                  t: "Choose a service",
+                  d: "Diagnostics, inspection, or servicing — we’ll guide you to the right fit.",
+                }, {
+                  n: "02",
+                  t: "Confirm vehicle + location",
+                  d: "We price accurately and plan the job properly.",
+                }, {
+                  n: "03",
+                  t: "Secure your time slot",
+                  d: "Pay online via Stripe to lock in the appointment.",
+                }].map((s) => (
+                  <div key={s.n} className="flex gap-4 rounded-[14px] border border-white/10 bg-white/5 p-4">
+                    <div className="font-mono text-primary font-bold">{s.n}</div>
+                    <div>
+                      <div className="font-semibold">{s.t}</div>
+                      <div className="mt-1 text-white/70">{s.d}</div>
                     </div>
-                  ))}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-[14px] border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 font-semibold">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  Mobile across Auckland
+                </div>
+                <div className="mt-1 text-white/70">
+                  West Auckland, North Shore, Central — and beyond depending on the job.
                 </div>
               </div>
             </div>
@@ -85,222 +195,150 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section id="services" className="container space-y-12">
-        <div className="text-center space-y-4 max-w-2xl mx-auto">
-          <h2 className="text-3xl lg:text-5xl font-bold tracking-tight">Expert Services</h2>
-          <p className="text-muted text-lg">
-            Professional automotive solutions delivered to your home or workplace.
+      <section className="container mt-16" id="services">
+        <div className="max-w-3xl">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Choose your service</h2>
+          <p className="mt-3 text-muted text-lg">
+            Tap into clear pricing and professional diagnostics. Book online to secure your spot.
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {/* Diagnostics */}
-          <div className="flex flex-col p-8 rounded-2xl border border-border bg-surface hover:border-primary/50 transition-all group">
-            <div className="mb-6 inline-flex p-4 rounded-xl bg-primary/20 text-primary group-hover:scale-110 transition-transform">
-              < Zap className="w-8 h-8 " />
-            </div>
-            <h3 className="text-2xl font-bold mb-2">Diagnostics</h3>
-            <p className="text-muted mb-6 flex-grow">
-              Ideal for warning lights, rough idle, or performance issues. We use professional scan tools to find the root cause.
-            </p>
-            <div className="text-2xl font-bold text-primary mb-6">$140 <span className="text-sm font-normal text-muted">flat rate</span></div>
-            <ul className="space-y-3 mb-8">
-              {[
-                "Full OBD2 Scan & Clear",
-                "Live Data Analysis",
-                "Written Diagnostic Report",
-                "Recommendations for repair",
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-primary" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <a href="/instant-quote?intent=DIAGNOSTICS" className="w-full py-4 rounded-xl bg-primary/10 text-primary font-bold hover:bg-primary hover:text-primaryText transition-all text-center">
-              Book Diagnostics
-            </a>
-          </div>
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          {SERVICES.map((s) => (
+            <div key={s.intent} className="relative rounded-[22px] border border-border bg-surface p-8 shadow-xl">
+              {s.badge && (
+                <div className="absolute right-5 top-5 rounded-full bg-primary text-primaryText text-xs font-bold uppercase tracking-widest px-3 py-1">
+                  {s.badge}
+                </div>
+              )}
 
-          {/* PPI */}
-          <div className="flex flex-col p-8 rounded-2xl border border-border bg-surface hover:border-primary/50 transition-all group relative">
-            <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-primary text-primaryText text-xs font-bold uppercase tracking-widest">Popular</div>
-            <div className="mb-6 inline-flex p-4 rounded-xl bg-primary/20 text-primary group-hover:scale-110 transition-transform">
-              <MapPin className="w-8 h-8" />
-            </div>
-            <h3 className="text-2xl font-bold mb-2">Pre-Purchase</h3>
-            <p className="text-muted mb-6 flex-grow">
-              Don't buy a lemon. Our 100+ point inspection gives you full confidence before you commit to a purchase.
-            </p>
-            <div className="text-2xl font-bold text-primary mb-6">$180 <span className="text-sm font-normal text-muted">flat rate</span></div>
-            <ul className="space-y-3 mb-8">
-              {[
-                "Engine & Drivetrain Check",
-                "Photos of critical issues",
-                "Body & Rust Assessment",
-                "Road Test & Report",
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-primary" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <a href="/instant-quote?intent=PPI" className="w-full py-4 rounded-xl bg-primary/10 text-primary font-bold hover:bg-primary hover:text-primaryText transition-all text-center">
-              Book Inspection
-            </a>
-          </div>
+              <div className="inline-flex items-center justify-center rounded-xl bg-primary/15 border border-primary/30 p-3 text-primary">
+                {s.icon}
+              </div>
 
-          {/* Servicing */}
-          <div className="flex flex-col p-8 rounded-2xl border border-border bg-surface hover:border-primary/50 transition-all group">
-            <div className="mb-6 inline-flex p-4 rounded-xl bg-primary/20 text-primary group-hover:scale-110 transition-transform">
-              <Clock className="w-8 h-8" />
+              <div className="mt-5">
+                <h3 className="text-2xl font-bold">{s.title}</h3>
+                <div className="mt-2 text-primary font-bold text-2xl">{s.price}</div>
+                <p className="mt-3 text-muted leading-relaxed">{s.lead}</p>
+              </div>
+
+              <ul className="mt-6 space-y-3 text-sm">
+                {s.bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-primary mt-0.5" />
+                    <span className="text-white/80">{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-8">
+                <Link
+                  href={`/instant-quote?intent=${s.intent}`}
+                  className="no-underline inline-flex w-full items-center justify-center h-12 rounded-xl bg-primary text-primaryText font-bold hover:bg-primary/90 transition-colors"
+                >
+                  Get price & availability
+                </Link>
+              </div>
             </div>
-            <h3 className="text-2xl font-bold mb-2">Servicing</h3>
-            <p className="text-muted mb-6 flex-grow">
-              Regular maintenance to keep your engine running smoothly and preserve your vehicle's value.
-            </p>
-            <div className="text-2xl font-bold text-primary mb-6">From $149 <span className="text-sm font-normal text-muted">estimate</span></div>
-            <ul className="space-y-3 mb-8">
-              {[
-                "Oil + Filter Changes",
-                "Basic Safety Services",
-                "Comprehensive Servicing",
-                "Service Light Resets",
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-primary" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <a href="/instant-quote?intent=SERVICE" className="w-full py-4 rounded-xl bg-primary/10 text-primary font-bold hover:bg-primary hover:text-primaryText transition-all text-center">
-              Get Service Quote
-            </a>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Service Tiers Detailed */}
-      <section className="bg-surface2 py-20">
-        <div className="container space-y-12">
-          <div className="text-center space-y-4 max-w-2xl mx-auto">
-            <h2 className="text-3xl lg:text-4xl font-bold">Service Tiers</h2>
-            <p className="text-muted">Detailed breakdown of our mobile service levels.</p>
-          </div>
-
-          <div className="grid gap-8 lg:grid-cols-3">
-            {/* Oil + Filter */}
-            <div className="bg-surface border border-border p-8 rounded-2xl space-y-6">
-              <div>
-                <h4 className="text-xl font-bold">Oil + Filter</h4>
-                <p className="text-sm text-muted mt-1">Essential engine protection</p>
-              </div>
-              <ul className="space-y-3 text-sm">
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Fresh premium oil (up to 5L)</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Quality oil filter replacement</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Basic under-bonnet safety check</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Fluid level top-ups</span>
-                </li>
-              </ul>
+      <section className="container mt-16">
+        <div className="rounded-[26px] border border-white/10 bg-white/5 p-8 lg:p-12">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
+            <div className="lg:col-span-5">
+              <div className="text-xs font-semibold uppercase tracking-widest text-muted">What you get</div>
+              <h2 className="mt-3 text-3xl md:text-4xl font-bold">Dealer-level clarity. Mobile convenience.</h2>
+              <p className="mt-4 text-muted text-lg leading-relaxed">
+                You’re not just paying for time — you’re paying for certainty. We document what we find, explain it in plain
+                language, and tell you what matters now vs later.
+              </p>
             </div>
 
-            {/* Basic Service */}
-            <div className="bg-surface border border-border p-8 rounded-2xl space-y-6">
-              <div>
-                <h4 className="text-xl font-bold">Basic Service</h4>
-                <p className="text-sm text-muted mt-1">Complete safety & maintenance</p>
-              </div>
-              <ul className="space-y-3 text-sm">
-                <li className="flex gap-2 font-semibold">
-                  <span className="text-primary italic">Everything in Oil + Filter, plus:</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Brake inspection & report</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Tyre pressure & condition check</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Battery & charging system test</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Suspension & steering check</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Service light reset</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Comprehensive Service */}
-            <div className="bg-surface border border-primary/30 p-8 rounded-2xl space-y-6 ring-1 ring-primary/20 shadow-xl">
-              <div>
-                <h4 className="text-xl font-bold">Comprehensive</h4>
-                <p className="text-sm text-muted mt-1">Ultimate peace of mind</p>
-              </div>
-              <ul className="space-y-3 text-sm">
-                <li className="flex gap-2 font-semibold">
-                  <span className="text-primary italic">Everything in Basic Service, plus:</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Air filter inspection & condition report</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Cabin/pollen filter inspection</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Spark plug inspection or replacement*</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Brake clean & adjust</span>
-                </li>
-                <li className="flex gap-2">
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                  <span>Full system diagnostic scan</span>
-                </li>
-              </ul>
-              <p className="text-[10px] text-muted italic">*Parts priced separately based on vehicle model</p>
+            <div className="lg:col-span-7 grid gap-4 sm:grid-cols-2">
+              {[
+                {
+                  icon: <Wrench className="w-5 h-5" />,
+                  title: "Root-cause diagnostics",
+                  desc: "We don’t guess. We test and confirm.",
+                },
+                {
+                  icon: <Shield className="w-5 h-5" />,
+                  title: "Workmanship you can trust",
+                  desc: "Fully insured and transparent scope.",
+                },
+                {
+                  icon: <Clock className="w-5 h-5" />,
+                  title: "Time-saving mobile service",
+                  desc: "Home or workplace — you stay productive.",
+                },
+                {
+                  icon: <MapPin className="w-5 h-5" />,
+                  title: "Auckland coverage",
+                  desc: "West, North Shore, Central and beyond.",
+                },
+              ].map((f) => (
+                <div key={f.title} className="rounded-[18px] border border-white/10 bg-black/30 p-5">
+                  <div className="inline-flex items-center justify-center rounded-xl bg-primary/15 border border-primary/30 p-2 text-primary">
+                    {f.icon}
+                  </div>
+                  <div className="mt-4 font-semibold">{f.title}</div>
+                  <div className="mt-1 text-sm text-white/70">{f.desc}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container">
-        <div className="rounded-[2rem] bg-primary p-8 lg:p-16 text-center space-y-6">
-          <h2 className="text-4xl lg:text-6xl font-bold text-primaryText tracking-tight">Ready to book?</h2>
-          <p className="text-primaryText/80 text-lg max-w-xl mx-auto font-medium">
-            Get an instant price for your vehicle and secure your time slot in under 2 minutes.
-          </p>
-          <div className="pt-4">
-            <a 
-              href="/instant-quote"
-              className="inline-flex items-center justify-center px-10 py-5 rounded-2xl bg-bg text-text font-bold text-xl hover:scale-105 transition-all shadow-2xl"
-            >
-              Start Instant Quote
-            </a>
+      <section className="container mt-16">
+        <div className="grid gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <div className="text-xs font-semibold uppercase tracking-widest text-muted">FAQ</div>
+            <h2 className="mt-3 text-3xl md:text-4xl font-bold">Common questions</h2>
+            <p className="mt-4 text-muted text-lg">
+              Quick answers so you can book with confidence.
+            </p>
+          </div>
+
+          <div className="lg:col-span-7 space-y-4">
+            {FAQS.map((f) => (
+              <div key={f.q} className="rounded-[18px] border border-border bg-surface p-6">
+                <div className="font-semibold">{f.q}</div>
+                <div className="mt-2 text-sm text-white/70 leading-relaxed">{f.a}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="container mt-16">
+        <div className="rounded-[28px] bg-primary p-10 lg:p-16 text-center">
+          <div className="max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 rounded-full bg-black/15 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-primaryText">
+              Ready when you are
+            </div>
+            <h2 className="mt-6 text-4xl lg:text-6xl font-bold text-primaryText tracking-tight">
+              Secure a booking in minutes.
+            </h2>
+            <p className="mt-4 text-primaryText/80 text-lg font-medium">
+              Get an instant quote for your vehicle and lock in a time slot online.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href="/instant-quote"
+                className="no-underline inline-flex items-center justify-center px-10 py-5 rounded-2xl bg-bg text-text font-bold text-xl hover:scale-[1.02] transition-transform shadow-2xl"
+              >
+                Start instant quote
+              </Link>
+              <Link
+                href="/contact"
+                className="no-underline inline-flex items-center justify-center px-10 py-5 rounded-2xl border border-black/25 text-primaryText font-bold text-xl hover:bg-black/10 transition-colors"
+              >
+                Ask a question
+              </Link>
+            </div>
           </div>
         </div>
       </section>

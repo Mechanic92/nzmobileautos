@@ -18,6 +18,10 @@ const sessionSchema = z.object({
     line1: z.string().min(1),
     suburb: z.string().min(1),
   }),
+  policyAcceptance: z.object({
+    termsAccepted: z.literal(true),
+    cancellationPolicyAccepted: z.literal(true),
+  }),
 });
 
 /**
@@ -34,6 +38,13 @@ export async function POST(req: NextRequest) {
     }
 
     const { quoteId, startTime, customer } = result.data;
+
+    const now = new Date();
+    const termsVersion = "2026-01-31";
+    const cancellationPolicyVersion = "2026-01-31";
+    const termsAcceptedIp =
+      (req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "").split(",")[0].trim() || null;
+    const termsAcceptedUserAgent = req.headers.get("user-agent") || null;
 
     // 1. Get Quote Snapshot (prefer InstantQuote, fall back to legacy QuoteRequest)
     const instant = await prisma.instantQuote.findUnique({
@@ -167,6 +178,12 @@ export async function POST(req: NextRequest) {
         slotEnd: end,
         pricingSnapshotJson: pricing,
         paymentExpiresAt: holdExpiresAt,
+        termsAcceptedAt: now,
+        termsVersion,
+        cancellationPolicyAcceptedAt: now,
+        cancellationPolicyVersion,
+        termsAcceptedIp,
+        termsAcceptedUserAgent,
       }
     });
 
@@ -204,6 +221,11 @@ export async function POST(req: NextRequest) {
       metadata: {
         bookingId: booking.id,
         quoteId,
+        termsAcceptedAt: now.toISOString(),
+        termsVersion,
+        cancellationPolicyAcceptedAt: now.toISOString(),
+        cancellationPolicyVersion,
+        termsAcceptedIp: termsAcceptedIp || "",
       },
       expires_at: stripeExpiresAt,
     });

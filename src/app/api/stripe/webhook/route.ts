@@ -68,6 +68,49 @@ export async function POST(req: Request) {
 
     const bookingId = session?.metadata?.bookingId;
     if (bookingId) {
+      try {
+        const termsAcceptedAtIso = String(session?.metadata?.termsAcceptedAt || "").trim();
+        const cancellationAcceptedAtIso = String(session?.metadata?.cancellationPolicyAcceptedAt || "").trim();
+        const termsVersion = String(session?.metadata?.termsVersion || "").trim();
+        const cancellationPolicyVersion = String(session?.metadata?.cancellationPolicyVersion || "").trim();
+        const termsAcceptedIp = String(session?.metadata?.termsAcceptedIp || "").trim();
+
+        const existing = await prisma.booking.findUnique({
+          where: { id: bookingId },
+          select: {
+            id: true,
+            termsAcceptedAt: true,
+            cancellationPolicyAcceptedAt: true,
+            termsVersion: true,
+            cancellationPolicyVersion: true,
+            termsAcceptedIp: true,
+          },
+        });
+
+        if (existing) {
+          const update: any = {};
+
+          if (!existing.termsAcceptedAt && termsAcceptedAtIso) update.termsAcceptedAt = new Date(termsAcceptedAtIso);
+          if (!existing.termsVersion && termsVersion) update.termsVersion = termsVersion;
+
+          if (!existing.cancellationPolicyAcceptedAt && cancellationAcceptedAtIso) {
+            update.cancellationPolicyAcceptedAt = new Date(cancellationAcceptedAtIso);
+          }
+          if (!existing.cancellationPolicyVersion && cancellationPolicyVersion) {
+            update.cancellationPolicyVersion = cancellationPolicyVersion;
+          }
+
+          if (!existing.termsAcceptedIp && termsAcceptedIp) update.termsAcceptedIp = termsAcceptedIp;
+
+          if (Object.keys(update).length > 0) {
+            await prisma.booking.update({ where: { id: bookingId }, data: update });
+          }
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("Persisting policy acceptance failed", err);
+      }
+
       await db().updateBookingStatus({ id: bookingId }, { status: "CONFIRMED" });
 
       // Fetch full booking record once for downstream side-effects.

@@ -101,12 +101,14 @@ export default function BookingEngine() {
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [holdCountdown, setHoldCountdown] = useState<number | null>(null);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "", address: "", issue: "" });
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
 
   const goToStep = (s: BookingStep) => {
     setError(null);
+    if (s !== 6) setTermsAccepted(false);
     setStep(s);
   };
 
@@ -341,6 +343,10 @@ export default function BookingEngine() {
       setError(validationError);
       return;
     }
+    if (!termsAccepted) {
+      setError("Please accept the Terms & Conditions and 24-hour cancellation policy to continue.");
+      return;
+    }
     if (!pricing?.quoteId || !selectedSlot) {
       setError("Missing quote or time slot.");
       return;
@@ -361,6 +367,10 @@ export default function BookingEngine() {
             phone: customer.phone,
             line1: customer.address,
             suburb: "Auckland",
+          },
+          policyAcceptance: {
+            termsAccepted: true,
+            cancellationPolicyAccepted: true,
           },
         }),
       });
@@ -698,6 +708,38 @@ export default function BookingEngine() {
                 </div>
               )}
 
+              <div className="p-4 rounded-[10px] bg-surface border border-border">
+                <div className="text-xs font-semibold uppercase tracking-widest text-muted">Before you pay</div>
+                <div className="mt-3 grid gap-2 text-sm">
+                  {[
+                    "Fully insured mobile mechanic",
+                    "Upfront pricing shown before you pay",
+                    "Secure payment processing via Stripe",
+                    "Cancel or reschedule up to 24 hours before your appointment",
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-primary" />
+                      <span className="text-muted">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <label className="flex items-start gap-3 p-4 rounded-[10px] bg-surface border border-border cursor-pointer hover:border-primary/50 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="w-5 h-5 mt-0.5 rounded border-border text-primary focus:ring-primary bg-bg"
+                />
+                <span className="text-sm text-muted leading-relaxed">
+                  I agree to the{" "}
+                  <a className="text-primary" href="/terms" target="_blank" rel="noreferrer">Terms & Conditions</a>
+                  {" "}and the{" "}
+                  <a className="text-primary" href="/cancellation-policy" target="_blank" rel="noreferrer">24-hour cancellation policy</a>.
+                </span>
+              </label>
+
               <div className="text-xs text-muted space-y-1">
                 <p>• Payment is processed securely via Stripe.</p>
                 <p>• You can cancel or reschedule up to 24 hours before your appointment.</p>
@@ -710,10 +752,10 @@ export default function BookingEngine() {
                 </button>
                 <button
                   onClick={submitBooking}
-                  disabled={submitting}
+                  disabled={submitting || !termsAccepted}
                   className="flex-1 h-14 rounded-[10px] bg-primary text-primaryText font-bold text-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Confirm & Secure Booking"}
+                  {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Secure My Appointment"}
                 </button>
               </div>
 

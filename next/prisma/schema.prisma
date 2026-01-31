@@ -86,6 +86,12 @@ model Booking {
   pricingSnapshotJson Json
   stripeSessionId     String?
   paymentExpiresAt    DateTime?
+  termsAcceptedAt     DateTime?
+  termsVersion        String?
+  cancellationPolicyAcceptedAt DateTime?
+  cancellationPolicyVersion    String?
+  termsAcceptedIp     String?
+  termsAcceptedUserAgent String?
   serviceM8JobId      String?         @unique
   serviceM8Url        String?
   createdAt           DateTime        @default(now())
