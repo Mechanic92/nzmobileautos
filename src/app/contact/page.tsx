@@ -100,8 +100,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <div className="font-semibold mb-1">Email</div>
-                  <a href="mailto:info@mobileautoworksnz.com" className="text-muted hover:text-primary transition-colors">
-                    info@mobileautoworksnz.com
+                  <a href="mailto:chris@mobileautoworks.com" className="text-muted hover:text-primary transition-colors">
+                    chris@mobileautoworks.com
                   </a>
                 </div>
               </div>
