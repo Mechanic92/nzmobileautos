@@ -54,6 +54,31 @@ function formatNzd(cents: number) {
   return new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" }).format(cents / 100);
 }
 
+async function readJsonSafely(res: Response): Promise<unknown> {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return { raw: text };
+  }
+}
+
+function extractError(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const maybe = body as { error?: unknown; message?: unknown };
+  if (typeof maybe.error === "string" && maybe.error.trim()) return maybe.error;
+  if (typeof maybe.message === "string" && maybe.message.trim()) return maybe.message;
+  return null;
+}
+
+function extractRaw(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const maybe = body as { raw?: unknown };
+  if (typeof maybe.raw === "string" && maybe.raw.trim()) return maybe.raw;
+  return null;
+}
+
 export default function InstantQuoteClient() {
   const router = useRouter();
 
@@ -96,10 +121,16 @@ export default function InstantQuoteClient() {
         body: JSON.stringify({ plateOrVin: cleaned }),
       });
 
-      const identityJson = (await identityRes.json()) as any;
-      if (!identityRes.ok) throw new Error(identityJson?.error || "Identity lookup failed");
+      const identityBody = await readJsonSafely(identityRes);
+      if (!identityRes.ok) {
+        const msg =
+          extractError(identityBody) ||
+          (identityRes.status ? `Identity lookup failed (${identityRes.status})` : "Identity lookup failed");
+        const raw = extractRaw(identityBody);
+        throw new Error(raw ? `${msg}: ${raw}` : msg);
+      }
 
-      const i = identityJson as IdentityResponse;
+      const i = identityBody as IdentityResponse;
       setIdentity(i);
 
       const quoteRes = await fetch("/api/quote", {
@@ -108,10 +139,16 @@ export default function InstantQuoteClient() {
         body: JSON.stringify({ vehicleIdentity: i.vehicleIdentity, intent }),
       });
 
-      const quoteJson = (await quoteRes.json()) as any;
-      if (!quoteRes.ok) throw new Error(quoteJson?.error || "Quote generation failed");
+      const quoteBody = await readJsonSafely(quoteRes);
+      if (!quoteRes.ok) {
+        const msg =
+          extractError(quoteBody) ||
+          (quoteRes.status ? `Quote generation failed (${quoteRes.status})` : "Quote generation failed");
+        const raw = extractRaw(quoteBody);
+        throw new Error(raw ? `${msg}: ${raw}` : msg);
+      }
 
-      setQuote(quoteJson as QuoteResponse);
+      setQuote(quoteBody as QuoteResponse);
     } catch (e: any) {
       setError(e?.message || "Something went wrong");
     } finally {
