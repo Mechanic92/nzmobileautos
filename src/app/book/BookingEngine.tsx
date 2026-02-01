@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { format, addDays, startOfToday } from "date-fns";
+import { useSearchParams } from "next/navigation";
+import { format, addDays } from "date-fns";
 import { Loader2, Wrench, Search, Settings, Check, ChevronRight, Clock, AlertTriangle } from "lucide-react";
 
 type ServiceMode = "DIAGNOSTICS" | "PPI" | "SERVICE";
@@ -28,7 +28,7 @@ interface PricingResult {
   durationMinutes: number;
   disclaimers: string[];
   breakdown: { key: string; label: string; amountCents: number }[];
-  rawAddOns?: any;
+  rawAddOns?: Record<string, unknown>;
 }
 
 interface SlotData {
@@ -83,7 +83,6 @@ const SERVICE_OPTIONS: { mode: ServiceMode; icon: React.ReactNode; title: string
 ];
 
 export default function BookingEngine() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const incomingQuoteId = searchParams.get("quoteId");
 
@@ -172,7 +171,7 @@ export default function BookingEngine() {
     }
   };
 
-  const fetchPricing = useCallback(async (addOns?: any) => {
+  const fetchPricing = useCallback(async (addOns?: Record<string, unknown>) => {
     if (!vehicle || !serviceMode) return;
     setPricingLoading(true);
     setError(null);

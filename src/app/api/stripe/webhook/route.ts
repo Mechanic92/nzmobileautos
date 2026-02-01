@@ -6,8 +6,14 @@ import { sendBookingConfirmedBusinessEmail, sendBookingConfirmedCustomerEmail, s
 import { prisma } from "@/server/prisma";
 import { pushPaidJobToGearbox } from "@/lib/integrations/gearbox";
 import { createGoogleCalendarEvent } from "@/lib/integrations/googleCalendar";
+import type { Prisma } from "@prisma/client";
 
 export const runtime = "nodejs";
+
+type PricingSnapshot = {
+  totalIncGstCents?: number;
+  total?: number;
+};
 
 export async function POST(req: Request) {
   if (isDevNoDb()) {
@@ -18,7 +24,7 @@ export async function POST(req: Request) {
   // This prevents losing events and avoids crashing on transient Neon outages.
   try {
     await assertDbHealthyOrThrow();
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof DbUnavailableError) {
       // eslint-disable-next-line no-console
       console.error("/api/stripe/webhook degraded - db unavailable", {
@@ -46,8 +52,9 @@ export async function POST(req: Request) {
   let event;
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-  } catch (err: any) {
-    return new NextResponse(`Webhook signature verification failed: ${err?.message || ""}`.trim(), { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return new NextResponse(`Webhook signature verification failed: ${message}`.trim(), { status: 400 });
   }
 
   // Idempotency: store webhook event, ignore duplicates.
@@ -60,7 +67,7 @@ export async function POST(req: Request) {
   if (!idem.created) return NextResponse.json({ received: true, duplicate: true });
 
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as any;
+    const session = event.data.object as Stripe.Checkout.Session;
 
     if (session?.payment_status !== "paid") {
       return NextResponse.json({ received: true, ignored: true, reason: "payment_status_not_paid" });
@@ -88,7 +95,7 @@ export async function POST(req: Request) {
         });
 
         if (existing) {
-          const update: any = {};
+          const update: Prisma.BookingUpdateInput = {};
 
           if (!existing.termsAcceptedAt && termsAcceptedAtIso) update.termsAcceptedAt = new Date(termsAcceptedAtIso);
           if (!existing.termsVersion && termsVersion) update.termsVersion = termsVersion;
@@ -122,7 +129,7 @@ export async function POST(req: Request) {
       // Best-effort: push paid job payload to Gearbox (no Gearbox booking API usage).
       try {
         if (full) {
-          const pricing = full.pricingSnapshotJson as any;
+          const pricing = full.pricingSnapshotJson as unknown as PricingSnapshot;
           const totalAmountCents =
             typeof pricing?.totalIncGstCents === "number" ? pricing.totalIncGstCents : Math.round((pricing?.total || 0) * 100);
 

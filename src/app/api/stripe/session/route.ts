@@ -3,10 +3,26 @@ import Stripe from 'stripe';
 import { prisma } from '@/server/prisma';
 import { addMinutes } from 'date-fns';
 import { z } from 'zod';
+import type { Prisma } from "@prisma/client";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia' as any,
+  apiVersion: '2024-12-18.acacia' as Stripe.LatestApiVersion,
 });
+
+type PricingSnapshot = {
+  durationMinutes?: number;
+  totalIncGstCents?: number;
+  total?: number;
+  intent?: string;
+  vehicleIdentity?: {
+    plate?: string;
+    vin?: string;
+    make?: string;
+    model?: string;
+    year?: number;
+    fuel?: string;
+  };
+};
 
 const sessionSchema = z.object({
   quoteId: z.string().uuid(),
@@ -62,7 +78,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Quote not found' }, { status: 404 });
     }
 
-    const snapshot: any = instant ? (instant.pricingSnapshotJson as any) : (legacy!.pricingSnapshotJson as any);
+    const snapshot = (instant ? instant.pricingSnapshotJson : legacy!.pricingSnapshotJson) as unknown as PricingSnapshot;
 
     const start = new Date(startTime);
     const duration = typeof snapshot?.durationMinutes === 'number' && snapshot.durationMinutes > 0 ? snapshot.durationMinutes : 60;
@@ -133,13 +149,14 @@ export async function POST(req: NextRequest) {
     const snapVin = String(snapshot?.vehicleIdentity?.vin || legacy?.vehicle?.vin || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
     if (snapPlate || snapVin) {
+      const or: Prisma.VehicleWhereInput[] = [];
+      if (snapPlate) or.push({ plate: snapPlate });
+      if (snapVin) or.push({ vin: snapVin });
+
       const existingVehicle = await prisma.vehicle.findFirst({
         where: {
           customerId: dbCustomer.id,
-          OR: [
-            snapPlate ? { plate: snapPlate } : undefined,
-            snapVin ? { vin: snapVin } : undefined,
-          ].filter(Boolean) as any,
+          OR: or,
         },
       });
 
@@ -237,10 +254,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url });
 
-  } catch (error: any) {
-    console.error('[Stripe Session] Error:', error.message);
-    console.error('[Stripe Session] Stack:', error.stack);
-    console.error('[Stripe Session] Full Error:', JSON.stringify(error, null, 2));
-    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    console.error('[Stripe Session] Error:', message);
+    if (stack) console.error('[Stripe Session] Stack:', stack);
+    return NextResponse.json({ error: 'Internal Server Error', details: message }, { status: 500 });
   }
 }

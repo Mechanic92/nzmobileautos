@@ -1,5 +1,5 @@
 
-import { ArrowLeft, ArrowRight, Calendar, Tag, MessageSquare, Clock, User, Share2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Tag, MessageSquare, Clock, Share2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BLOG_POSTS } from "@/lib/blog-data";
@@ -197,7 +197,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               Ready for a professional service?
             </h2>
             <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-              Experience the convenience of Auckland's top-rated mobile mechanic. 
+              Experience the convenience of Auckland&apos;s top-rated mobile mechanic. 
               Transparent pricing, expert care, at your door.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">

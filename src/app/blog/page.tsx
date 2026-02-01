@@ -1,5 +1,5 @@
 
-import { ArrowRight, Calendar, Tag, Clock } from "lucide-react";
+import { ArrowRight, Calendar } from "lucide-react";
 import Link from "next/link";
 import { BLOG_POSTS } from "@/lib/blog-data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,7 +91,7 @@ export default function BlogPage() {
               Need Help With Your Car?
             </h2>
             <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
-              Don't let a small issue become a major repair. Get an instant quote for diagnostics or repairs today.
+              Don&apos;t let a small issue become a major repair. Get an instant quote for diagnostics or repairs today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/instant-quote">

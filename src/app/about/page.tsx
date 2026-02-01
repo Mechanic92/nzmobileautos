@@ -1,4 +1,4 @@
-import { Award, CheckCircle, Clock, Heart, MapPin, Phone, Shield, Star, Users, Wrench } from "lucide-react";
+import { Award, Clock, Heart, Shield, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
@@ -73,13 +73,13 @@ export default function AboutPage() {
                 </h2>
                 <div className="space-y-4 text-muted-foreground">
                   <p>
-                    <strong>Mobile Autoworks NZ</strong> was founded by Chris, a trade-qualified mechanic with a passion for excellence and a vision to redefine automotive service in Auckland. We understand that your time is your most valuable asset, and that taking your vehicle to a traditional workshop is a disruption you don't need.
+                    <strong>Mobile Autoworks NZ</strong> was founded by Chris, a trade-qualified mechanic with a passion for excellence and a vision to redefine automotive service in Auckland. We understand that your time is your most valuable asset, and that taking your vehicle to a traditional workshop is a disruption you don&apos;t need.
                   </p>
                   <p>
                     Chris brings over 15 years of hands-on experience across the automotive spectrum—from prestige European cars and everyday family vehicles to heavy-duty 4x4s and commercial fleets. Unlike many mobile services, Chris invests in the same high-end diagnostic technology used by main dealers, ensuring we find the root cause of issues, not just the symptoms.
                   </p>
                   <p>
-                    Today, Mobile Autoworks is the go-to choice for West Auckland professionals who demand the highest standards of workmanship and the ultimate convenience of on-site service. Every job Chris performs is backed by a commitment to total transparency—meaning you'll always know exactly what's being done and why.
+                    Today, Mobile Autoworks is the go-to choice for West Auckland professionals who demand the highest standards of workmanship and the ultimate convenience of on-site service. Every job Chris performs is backed by a commitment to total transparency—meaning you&apos;ll always know exactly what&apos;s being done and why.
                   </p>
                 </div>
               </div>
@@ -123,7 +123,7 @@ export default function AboutPage() {
                 What We Do
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                We bring the workshop to you. From routine servicing to complex diagnostics and repairs, our fully-equipped mobile service means you don't have to disrupt your day.
+                We bring the workshop to you. From routine servicing to complex diagnostics and repairs, our fully-equipped mobile service means you don&apos;t have to disrupt your day.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                 {services.map((service, index) => (
