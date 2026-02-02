@@ -7,6 +7,9 @@ import { getRevenueEnginePricingConfig } from "@/lib/config/pricing";
 export const ServiceIntentSchema = z.enum(["DIAGNOSTICS", "PPI", "SERVICE"]);
 export type ServiceIntent = z.infer<typeof ServiceIntentSchema>;
 
+export const ServiceTierSchema = z.enum(["OIL_FILTER", "BASIC", "COMPREHENSIVE"]).default("BASIC");
+export type ServiceTier = z.infer<typeof ServiceTierSchema>;
+
 export const AddOnsSchema = z
   .object({
     prioritySameDay: z.boolean().optional(),
@@ -14,6 +17,7 @@ export const AddOnsSchema = z
     afterHours: z.boolean().optional(),
     engineOilFlush: z.boolean().optional(),
     fuelAdditive: z.boolean().optional(),
+    serviceTier: ServiceTierSchema.optional(), // Allow passing tier here too
   })
   .default({});
 export type AddOns = z.infer<typeof AddOnsSchema>;
@@ -27,6 +31,7 @@ export type PricingLine = {
 export type PricingSnapshot = {
   currency: "NZD";
   intent: ServiceIntent;
+  serviceTier?: ServiceTier;
   vehicleIdentity: MotorWebIdentity;
   vehicleClass: VehicleClass;
   addOns: AddOns;
@@ -58,26 +63,35 @@ function includedOilLitres(vClass: VehicleClass, cfg: ReturnType<typeof getReven
   return cfg.oilPricing.includedLitresByVehicleClass.lightCar ?? cfg.oilPricing.defaultIncludedLitres;
 }
 
-function getServiceBandPrice(vClass: VehicleClass, cfg: ReturnType<typeof getRevenueEnginePricingConfig>): { basic: number; comprehensive: number; bandLabel: string } {
-  if (vClass.body_class === "PERFORMANCE" || vClass.power_band === "HIGH") {
-    return { basic: cfg.serviceBands.basic.euroPerformance, comprehensive: cfg.serviceBands.comprehensive.euroPerformance, bandLabel: "Euro / Performance" };
-  }
-  if (vClass.fuel_class === "DIESEL" && (vClass.body_class === "UTE" || vClass.body_class === "COMMERCIAL" || vClass.load_class === "HEAVY")) {
-    return { basic: cfg.serviceBands.basic.dieselUte, comprehensive: cfg.serviceBands.comprehensive.dieselUte, bandLabel: "Diesel Ute / Commercial" };
-  }
-  if (vClass.power_band === "MID" || vClass.body_class === "SUV") {
-    return { basic: cfg.serviceBands.basic.petrolMidCar, comprehensive: cfg.serviceBands.comprehensive.petrolMidCar, bandLabel: "Mid-Size / SUV" };
-  }
-  return { basic: cfg.serviceBands.basic.petrolSmallCar, comprehensive: cfg.serviceBands.comprehensive.petrolSmallCar, bandLabel: "Small Car" };
+function getServicePrices(vClass: VehicleClass, cfg: ReturnType<typeof getRevenueEnginePricingConfig>) {
+  const isPerformance = vClass.body_class === "PERFORMANCE" || vClass.power_band === "HIGH";
+  const isDieselComm = vClass.fuel_class === "DIESEL" && (vClass.body_class === "UTE" || vClass.body_class === "COMMERCIAL" || vClass.load_class === "HEAVY");
+  const isMid = vClass.power_band === "MID" || vClass.body_class === "SUV";
+
+  let band: 'petrolSmallCar' | 'petrolMidCar' | 'dieselUte' | 'euroPerformance' = 'petrolSmallCar';
+  let bandLabel = "Small Car";
+
+  if (isPerformance) { band = 'euroPerformance'; bandLabel = "Euro / Performance"; }
+  else if (isDieselComm) { band = 'dieselUte'; bandLabel = "Diesel Ute / Commercial"; }
+  else if (isMid) { band = 'petrolMidCar'; bandLabel = "Mid-Size / SUV"; }
+
+  return {
+    oil: cfg.serviceBands.oilFilter[band],
+    basic: cfg.serviceBands.basic[band],
+    comprehensive: cfg.serviceBands.comprehensive[band],
+    bandLabel
+  };
 }
 
 export function buildPricingSnapshot(input: {
   vehicleIdentity: MotorWebIdentity;
   intent: ServiceIntent;
   addOns?: AddOns;
+  tier?: ServiceTier;
 }): PricingSnapshot {
   const cfg = getRevenueEnginePricingConfig();
   const vehicleClass = classifyVehicle(input.vehicleIdentity);
+  const tier = input.tier || input.addOns?.serviceTier || "BASIC";
   const addOns = { prioritySameDay: false, outsideCoreArea: false, afterHours: false, ...(input.addOns || {}) };
 
   const disclaimers: string[] = [];
@@ -157,17 +171,31 @@ export function buildPricingSnapshot(input: {
   }
 
   if (input.intent === "SERVICE") {
-    const band = getServiceBandPrice(vehicleClass, cfg);
+    const prices = getServicePrices(vehicleClass, cfg);
     const included = includedOilLitres(vehicleClass, cfg);
+    
+    let basePrice = prices.basic;
+    let label = `Basic Service (${prices.bandLabel})`;
+    let duration = cfg.serviceDurationsMinutes.basicService;
 
-    lines.push({ key: "basicService", label: `Basic Service (${band.bandLabel})`, amountCents: band.basic });
+    if (tier === "OIL_FILTER") {
+      basePrice = prices.oil;
+      label = `Oil + Filter Change (${prices.bandLabel})`;
+      duration = cfg.serviceDurationsMinutes.basicService; // Usually same as basic
+    } else if (tier === "COMPREHENSIVE") {
+      basePrice = prices.comprehensive;
+      label = `Comprehensive Service (${prices.bandLabel})`;
+      duration = cfg.serviceDurationsMinutes.comprehensiveService;
+    }
 
+    lines.push({ key: "serviceBase", label, amountCents: basePrice });
     addAddOns();
 
     const total = sum(lines);
     return {
       currency: "NZD",
       intent: input.intent,
+      serviceTier: tier,
       vehicleIdentity: input.vehicleIdentity,
       vehicleClass,
       addOns,
@@ -177,19 +205,19 @@ export function buildPricingSnapshot(input: {
       totalIncGstCents: total,
       isEstimateOnly: false,
       disclaimers: [
-        `Estimated range based on vehicle class: ${band.bandLabel}.`,
+        `Service tier: ${tier === "OIL_FILTER" ? "Oil & Filter" : tier === "BASIC" ? "Basic" : "Comprehensive"}.`,
         `Price includes up to ${included} litres of oil. Extra oil charged at $${(cfg.oilPricing.extraOilPerLitreCents / 100).toFixed(0)}/litre if required.`,
-        "Final oil quantity confirmed onsite. Comprehensive service available on request.",
+        "Final oil quantity confirmed onsite.",
         "Prices shown are bounded for this service intent and include GST.",
         ...disclaimers,
       ],
-      durationMinutes: cfg.serviceDurationsMinutes.basicService,
+      durationMinutes: duration,
       oilIncludedLitres: included,
       extraOilPerLitreCents: cfg.oilPricing.extraOilPerLitreCents,
     };
   }
 
-  // Fallback (should not reach here with valid intent)
+  // Fallback
   return {
     currency: "NZD",
     intent: input.intent,
@@ -201,10 +229,7 @@ export function buildPricingSnapshot(input: {
     gstCents: 0,
     totalIncGstCents: null,
     isEstimateOnly: true,
-    disclaimers: [
-      "Unable to generate pricing for this service type.",
-      "Please contact us for a custom quote.",
-    ],
+    disclaimers: ["Unable to generate pricing."],
     durationMinutes: null,
   };
 }

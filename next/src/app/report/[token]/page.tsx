@@ -1,5 +1,6 @@
 import { db } from "@/server/db";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -30,14 +31,16 @@ export default async function PublicReportPage({ params }: { params: Promise<{ t
           <h2 className="text-lg font-semibold">Photos</h2>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {imageAttachments.map((a: any, idx: number) => (
-              <a key={idx} href={a.url} target="_blank" rel="noreferrer" className="block">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={a.url}
-                  alt={a.label || `Photo ${idx + 1}`}
-                  className="w-full rounded-lg border border-white/10 bg-black/20"
-                  loading="lazy"
-                />
+              <a key={idx} href={a.url} target="_blank" rel="noreferrer" className="block relative">
+                <div className="relative aspect-video">
+                  <Image
+                    src={a.url}
+                    alt={a.label || `Photo ${idx + 1}`}
+                    fill
+                    className="rounded-lg border border-white/10 bg-black/20 object-cover"
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                  />
+                </div>
                 <div className="mt-2 text-xs text-white/60">{a.label || a.name || ""}</div>
               </a>
             ))}

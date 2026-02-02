@@ -83,6 +83,11 @@ export async function sendBookingConfirmedBusinessEmail(input: {
   vehiclePlate: string;
   symptoms: string;
   adminUrl: string;
+  amountPaidCents?: number | null;
+  currency?: string | null;
+  stripeSessionId?: string | null;
+  serviceKind?: string | null;
+  vehicleDescription?: string | null;
 }) {
   const resend = getResendClient();
 
@@ -97,9 +102,20 @@ export async function sendBookingConfirmedBusinessEmail(input: {
       </div>
       <div style="padding:20px 24px;color:rgba(255,255,255,0.86);font-size:14px;line-height:1.6;">
         <div style="margin-bottom:14px;"><strong>Reference:</strong> ${input.bookingPublicId}</div>
+        ${
+          input.serviceKind
+            ? `<div style="margin-bottom:14px;"><strong>Service:</strong> ${input.serviceKind}</div>`
+            : ""
+        }
         <div style="margin-bottom:14px;"><strong>Preferred time (ISO):</strong> ${input.scheduledStartIso}</div>
         <div style="margin-bottom:14px;"><strong>Address:</strong> ${input.addressOneLine}</div>
-        <div style="margin-bottom:14px;"><strong>Vehicle:</strong> ${input.vehiclePlate}</div>
+        <div style="margin-bottom:14px;"><strong>Vehicle:</strong> ${(input.vehicleDescription || input.vehiclePlate) || "(not provided)"}</div>
+        ${
+          input.amountPaidCents != null && input.currency
+            ? `<div style="margin-bottom:14px;"><strong>Paid:</strong> ${(input.amountPaidCents / 100).toFixed(2)} ${String(input.currency).toUpperCase()}</div>`
+            : ""
+        }
+        ${input.stripeSessionId ? `<div style="margin-bottom:14px;"><strong>Stripe session:</strong> ${input.stripeSessionId}</div>` : ""}
         <div style="margin-bottom:14px;"><strong>Symptoms:</strong><br/>${(input.symptoms || "").replace(/\n/g, "<br/>")}</div>
 
         <div style="margin-top:18px;padding:14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:rgba(255,255,255,0.04);">
@@ -121,6 +137,81 @@ export async function sendBookingConfirmedBusinessEmail(input: {
     console.log("[DEV EMAIL]", { to: input.toEmail, subject, bookingPublicId: input.bookingPublicId });
     return;
   }
+
+  await sendEmail({ to: input.toEmail, subject, html });
+}
+
+export async function sendBookingConfirmedCustomerEmail(input: {
+  toEmail: string;
+  customerName: string;
+  bookingPublicId: string;
+  slotStartIso: string;
+  addressOneLine: string;
+  vehiclePlate: string;
+  supportPhoneDisplay?: string;
+  supportPhoneE164?: string;
+  manageUrl?: string;
+  amountPaidCents?: number | null;
+  currency?: string | null;
+}) {
+  const subject = `Booking confirmed: ${input.bookingPublicId}`;
+
+  const timeNz = new Intl.DateTimeFormat("en-NZ", {
+    timeZone: "Pacific/Auckland",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(input.slotStartIso));
+
+  const supportPhoneDisplay = input.supportPhoneDisplay || "027 642 1824";
+  const supportPhoneE164 = input.supportPhoneE164 || "+64276421824";
+
+  const paidLine =
+    input.amountPaidCents != null && input.currency
+      ? `<div style="margin-bottom:8px;"><strong>Paid:</strong> ${(input.amountPaidCents / 100).toFixed(2)} ${String(input.currency).toUpperCase()}</div>`
+      : "";
+
+  const html = `
+  <div style="background:#0a0a0a;padding:24px;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;">
+    <div style="max-width:640px;margin:0 auto;background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
+      <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="color:#f6c90e;font-weight:700;">Mobile Autoworks</div>
+        <div style="color:#fff;font-size:18px;font-weight:700;margin-top:6px;">Your booking is confirmed</div>
+      </div>
+      <div style="padding:20px 24px;color:rgba(255,255,255,0.86);font-size:14px;line-height:1.6;">
+        <p>Hi <strong>${input.customerName}</strong>, thanks for your payment — your booking is now confirmed.</p>
+
+        <div style="margin:14px 0;padding:14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:rgba(255,255,255,0.04);">
+          <div style="margin-bottom:8px;"><strong>Reference:</strong> ${input.bookingPublicId}</div>
+          <div style="margin-bottom:8px;"><strong>Time:</strong> ${timeNz}</div>
+          <div style="margin-bottom:8px;"><strong>Address:</strong> ${input.addressOneLine}</div>
+          <div style="margin-bottom:8px;"><strong>Vehicle:</strong> ${input.vehiclePlate}</div>
+          ${paidLine}
+        </div>
+
+        <div style="margin-top:14px;color:rgba(255,255,255,0.75);font-size:13px;">
+          <div style="font-weight:700;color:#fff;margin-bottom:6px;">What happens next</div>
+          <div>1) You’re confirmed — we’ll arrive within your scheduled window.</div>
+          <div>2) Please ensure we have access to the vehicle/keys and any lock codes if needed.</div>
+          <div>3) If anything changes, call/text <a style="color:#f6c90e;" href="tel:${supportPhoneE164}">${supportPhoneDisplay}</a>.</div>
+        </div>
+
+        ${
+          input.manageUrl
+            ? `<p style="margin:18px 0;">
+                <a href="${input.manageUrl}" style="display:inline-block;background:#f6c90e;color:#000;padding:12px 16px;border-radius:10px;text-decoration:none;font-weight:700;">View booking</a>
+              </p>`
+            : ""
+        }
+
+        <p style="color:rgba(255,255,255,0.55);font-size:12px;">This is an automated confirmation. Keep this email for your records.</p>
+      </div>
+    </div>
+  </div>`;
 
   await sendEmail({ to: input.toEmail, subject, html });
 }

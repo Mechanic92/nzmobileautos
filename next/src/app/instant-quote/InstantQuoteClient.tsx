@@ -84,6 +84,7 @@ export default function InstantQuoteClient() {
 
   const [plateOrVin, setPlateOrVin] = useState("");
   const [intent, setIntent] = useState<ServiceIntent>("DIAGNOSTICS");
+  const [tier, setTier] = useState<string>("BASIC");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -136,7 +137,11 @@ export default function InstantQuoteClient() {
       const quoteRes = await fetch("/api/quote", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ vehicleIdentity: i.vehicleIdentity, intent }),
+        body: JSON.stringify({
+          vehicleIdentity: i.vehicleIdentity,
+          intent,
+          tier: intent === "SERVICE" ? tier : undefined
+        }),
       });
 
       const quoteBody = await readJsonSafely(quoteRes);
@@ -179,6 +184,18 @@ export default function InstantQuoteClient() {
             <div className="space-y-2">
               <div className="text-xs font-semibold uppercase tracking-widest text-muted">Plate or VIN</div>
               <Input value={plateOrVin} onChange={(e) => setPlateOrVin(e.target.value.toUpperCase())} placeholder="ABC123 or VIN" />
+            </div>
+            <div className={`space-y-2 transition-all duration-300 ${intent === "SERVICE" ? "opacity-100 h-auto" : "opacity-0 h-0 overflow-hidden"}`}>
+              <div className="text-xs font-semibold uppercase tracking-widest text-muted">Service Tier</div>
+              <Select 
+                value={tier} 
+                onChange={(e) => setTier(e.target.value)} 
+                options={[
+                  { value: "OIL_FILTER", label: "Oil & Filter Change" },
+                  { value: "BASIC", label: "Basic Service" },
+                  { value: "COMPREHENSIVE", label: "Comprehensive Service" },
+                ]} 
+              />
             </div>
             <div className="space-y-2">
               <div className="text-xs font-semibold uppercase tracking-widest text-muted">Service intent</div>

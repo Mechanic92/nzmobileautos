@@ -2,16 +2,31 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { cookies } from "next/headers";
 import { adminCookieName, verifyAdminSession } from "@/server/adminSession";
+import MobileNav from "@/components/MobileNav";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.APP_URL || "https://mobileautoworksnz.com"),
+  metadataBase: new URL(process.env.APP_URL || "https://www.mobileautoworksnz.com"),
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
   title: {
-    default: "Mobile Autoworks NZ",
+    default: "Mobile Autoworks NZ | #1 Mobile Mechanic Auckland",
     template: "%s | Mobile Autoworks NZ",
   },
   description: "Book diagnostics and pre-purchase inspections across Auckland.",
   alternates: {
     canonical: "/",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Mobile Autoworks NZ',
+  },
+  formatDetection: {
+    telephone: false, // Prevent auto-detection interfering with styled phone links
   },
   openGraph: {
     type: "website",
@@ -44,19 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <div className="text-xs text-white/60">Auckland • Diagnostics • Pre-purchase inspections</div>
                 </div>
               </a>
-              <nav className="text-sm flex items-center gap-3">
-                {isAdmin && (
-                  <a className="text-white/80 hover:text-white no-underline px-3 py-2 rounded-md hover:bg-white/5" href="/admin">
-                    Admin
-                  </a>
-                )}
-                <a
-                  className="no-underline px-3 py-2 rounded-md bg-brand-yellow text-black font-semibold hover:bg-brand-yellow/90"
-                  href="/instant-quote"
-                >
-                  Instant quote
-                </a>
-              </nav>
+              <MobileNav isAdmin={isAdmin} />
             </div>
           </header>
           <main className="flex-1">{children}</main>

@@ -19,6 +19,7 @@ const quoteSaveSchema = z.object({
     plate: z.string().optional().default("UNKNOWN"),
   }),
   intent: ServiceIntentSchema,
+  tier: z.enum(["OIL_FILTER", "BASIC", "COMPREHENSIVE"]).optional(),
   addOns: AddOnsSchema.optional(),
 });
 
@@ -41,9 +42,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: result.error.format() }, { status: 400 });
     }
 
-    const { vehicleIdentity, intent, addOns } = result.data;
+    const { vehicleIdentity, intent, tier, addOns } = result.data;
 
-    const snapshot = buildPricingSnapshot({ vehicleIdentity, intent, addOns });
+    const snapshot = buildPricingSnapshot({ vehicleIdentity, intent, tier, addOns });
     const publicId = crypto.randomUUID();
 
     await prisma.instantQuote.create({

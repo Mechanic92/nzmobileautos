@@ -11,7 +11,7 @@ export default function HomePage() {
               <Zap className="w-4 h-4" />
               <span>Auckland's #1 Mobile Mechanic</span>
             </div>
-            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight leading-tight">
               Pro Car Care. <br />
               <span className="text-primary">At Your Door.</span>
             </h1>

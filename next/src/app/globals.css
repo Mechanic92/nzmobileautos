@@ -22,6 +22,7 @@
 html,
 body {
   height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -30,6 +31,9 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 .container {
@@ -64,4 +68,23 @@ a {
 /* Scroll margin for anchor links to account for sticky header */
 [id] {
   scroll-margin-top: 5rem;
+}
+
+/* Improve touch interactions - prevent unwanted zoom and tap highlights */
+button, a, [role="button"], [type="button"], [type="submit"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Smooth scrolling on iOS */
+html {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure minimum touch target size on mobile */
+@media (max-width: 768px) {
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }

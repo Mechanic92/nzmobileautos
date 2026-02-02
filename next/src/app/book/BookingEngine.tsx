@@ -28,6 +28,7 @@ interface PricingResult {
   durationMinutes: number;
   disclaimers: string[];
   breakdown: { key: string; label: string; amountCents: number }[];
+  rawAddOns?: any;
 }
 
 interface SlotData {
@@ -98,6 +99,7 @@ export default function BookingEngine() {
   const [slots, setSlots] = useState<SlotData[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
+  const [serviceTier, setServiceTier] = useState<string>("BASIC");
   const [holdCountdown, setHoldCountdown] = useState<number | null>(null);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "", address: "", issue: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -170,6 +172,7 @@ export default function BookingEngine() {
         body: JSON.stringify({ 
           vehicleIdentity: vehiclePayload, 
           intent: serviceMode,
+          tier: addOns?.serviceTier || serviceTier,
           addOns: addOns || pricing?.rawAddOns || {}
         }),
       });
@@ -252,6 +255,10 @@ export default function BookingEngine() {
           disclaimers: snap?.disclaimers || [],
           breakdown: snap?.lines || [],
         });
+        
+        if (snap?.serviceTier) {
+          setServiceTier(snap.serviceTier);
+        }
         
         // Skip to step 4 (time selection)
         setStep(4);
@@ -486,8 +493,36 @@ export default function BookingEngine() {
                   )}
 
                   {serviceMode === "SERVICE" && (
-                    <div className="space-y-3">
-                      <div className="text-xs font-semibold uppercase tracking-widest text-muted">Optional Extras</div>
+                    <div className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="text-xs font-semibold uppercase tracking-widest text-muted">Service Level</div>
+                        <div className="grid gap-2">
+                          {[
+                            { id: "OIL_FILTER", label: "Oil & Filter Change", desc: "Basic protection" },
+                            { id: "BASIC", label: "Basic Service", desc: "Safety & Maintenance" },
+                            { id: "COMPREHENSIVE", label: "Comprehensive", desc: "Total peace of mind" },
+                          ].map((t) => (
+                            <button
+                              key={t.id}
+                              onClick={() => {
+                                setServiceTier(t.id);
+                                fetchPricing({ ...pricing?.rawAddOns, serviceTier: t.id });
+                              }}
+                              className={`p-3 rounded-[10px] border text-left transition-all ${
+                                serviceTier === t.id
+                                  ? "bg-surface border-primary ring-1 ring-primary"
+                                  : "bg-surface border-border hover:border-primary/50"
+                              }`}
+                            >
+                              <div className="font-semibold text-sm">{t.label}</div>
+                              <div className="text-xs text-muted">{t.desc}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="text-xs font-semibold uppercase tracking-widest text-muted">Optional Extras</div>
                       <div className="grid gap-3">
                         <label className="flex items-center justify-between p-4 rounded-[10px] bg-surface border border-border cursor-pointer hover:border-primary/50 transition-colors">
                           <div className="flex items-center gap-3">
@@ -521,7 +556,8 @@ export default function BookingEngine() {
                         </label>
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
 
                   <div className="flex gap-3">
                     <button onClick={() => goToStep(2)} className="flex-1 h-12 rounded-[10px] border border-border text-muted hover:text-text hover:border-primary/50 transition-colors">
@@ -654,7 +690,14 @@ export default function BookingEngine() {
           <StepContainer title="Confirm & Pay" subtitle="Review your booking and complete payment.">
             <div className="space-y-6">
               <div className="p-4 rounded-[10px] bg-surface border border-border space-y-3">
-                <SummaryLine label="Service" value={serviceMode === "DIAGNOSTICS" ? "Diagnostics" : serviceMode === "PPI" ? "Pre-Purchase Inspection" : "Service / Repair"} />
+                <SummaryLine 
+                  label="Service" 
+                  value={
+                    serviceMode === "DIAGNOSTICS" ? "Diagnostics" : 
+                    serviceMode === "PPI" ? "Pre-Purchase Inspection" : 
+                    `Service (${serviceTier === "OIL_FILTER" ? "Oil & Filter" : serviceTier === "COMPREHENSIVE" ? "Comprehensive" : "Basic"})`
+                  } 
+                />
                 <SummaryLine label="Vehicle" value={vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model} (${vehicle.plate})` : "—"} />
                 <SummaryLine label="Date & Time" value={selectedSlot ? format(new Date(selectedSlot.start), "EEE d MMM, h:mm aa") : "—"} />
                 <SummaryLine label="Location" value={customer.address || "—"} />
@@ -822,14 +865,19 @@ function InputField({
   placeholder: string;
   type?: string;
 }) {
+  // Determine inputMode based on type for better mobile keyboard
+  const inputMode = type === "email" ? "email" : type === "tel" ? "tel" : type === "number" ? "numeric" : undefined;
+  
   return (
     <div className="space-y-2">
       <label className="text-xs font-semibold uppercase tracking-widest text-muted">{label}</label>
       <input
         type={type}
+        inputMode={inputMode}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        autoComplete={type === "email" ? "email" : type === "tel" ? "tel" : undefined}
         className="w-full h-12 bg-surface border border-border rounded-[10px] px-4 text-sm text-text placeholder:text-muted/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
       />
     </div>

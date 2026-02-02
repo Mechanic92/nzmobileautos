@@ -134,7 +134,8 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Identity API Error:', error.message);
+    console.error('Identity API Error for plate:', normalizedPlateOrVin, ' - Error:', error.message);
+    if (error.stack) console.error('Stack:', error.stack);
     
     // Log failure
     const cfg = getRevenueEnginePricingConfig();
