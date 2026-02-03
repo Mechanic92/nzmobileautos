@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { format, addDays } from "date-fns";
 import { Loader2, Wrench, Search, Settings, Check, ChevronRight, Clock, AlertTriangle } from "lucide-react";
 
@@ -28,7 +28,7 @@ interface PricingResult {
   durationMinutes: number;
   disclaimers: string[];
   breakdown: { key: string; label: string; amountCents: number }[];
-  rawAddOns?: Record<string, unknown>;
+  rawAddOns?: any;
 }
 
 interface SlotData {
@@ -75,14 +75,15 @@ const SERVICE_OPTIONS: { mode: ServiceMode; icon: React.ReactNode; title: string
     price: "From $149",
     description: "Quality servicing at your location. Choose from three service levels based on your needs.",
     details: [
-      "Oil + Filter Change — Fresh oil & quality filter, basic safety check",
-      "Basic Service — Oil, filter, top-up fluids, inspect air filter, brakes & tyres",
-      "Comprehensive Service — Full safety inspection, air/cabin filter inspection, spark plugs (petrol), brake clean & adjust",
+      "Oil + Filter Change — From $149",
+      "Basic Service — From $275",
+      "Comprehensive Service — From $385",
     ],
   },
 ];
 
 export default function BookingEngine() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const incomingQuoteId = searchParams.get("quoteId");
 
@@ -98,38 +99,16 @@ export default function BookingEngine() {
   const [slots, setSlots] = useState<SlotData[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
+  const [serviceTier, setServiceTier] = useState<string>("BASIC");
   const [holdCountdown, setHoldCountdown] = useState<number | null>(null);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "", address: "", issue: "" });
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
 
   const goToStep = (s: BookingStep) => {
     setError(null);
-    if (s !== 6) setTermsAccepted(false);
     setStep(s);
-  };
-
-  const formatNzTime = (isoOrDate: string | Date) => {
-    const d = typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate;
-    return new Intl.DateTimeFormat("en-NZ", {
-      timeZone: "Pacific/Auckland",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    }).format(d);
-  };
-
-  const formatNzDate = (isoOrDate: string | Date) => {
-    const d = typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate;
-    return new Intl.DateTimeFormat("en-NZ", {
-      timeZone: "Pacific/Auckland",
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(d);
   };
 
   const lookupVehicle = async () => {
@@ -171,7 +150,7 @@ export default function BookingEngine() {
     }
   };
 
-  const fetchPricing = useCallback(async (addOns?: Record<string, unknown>) => {
+  const fetchPricing = useCallback(async (addOns?: any) => {
     if (!vehicle || !serviceMode) return;
     setPricingLoading(true);
     setError(null);
@@ -193,6 +172,7 @@ export default function BookingEngine() {
         body: JSON.stringify({ 
           vehicleIdentity: vehiclePayload, 
           intent: serviceMode,
+          tier: addOns?.serviceTier || serviceTier,
           addOns: addOns || pricing?.rawAddOns || {}
         }),
       });
@@ -218,9 +198,9 @@ export default function BookingEngine() {
     } finally {
       setPricingLoading(false);
     }
-  }, [vehicle, serviceMode, pricing?.rawAddOns]);
+  }, [vehicle, serviceMode, pricing?.rawAddOns, serviceTier]);
 
-  const updateAddOns = (newAddOns: { engineOilFlush?: boolean; fuelAdditive?: boolean }) => {
+  const updateAddOns = (newAddOns: any) => {
     fetchPricing({ ...pricing?.rawAddOns, ...newAddOns });
   };
 
@@ -275,6 +255,10 @@ export default function BookingEngine() {
           disclaimers: snap?.disclaimers || [],
           breakdown: snap?.lines || [],
         });
+        
+        if (snap?.serviceTier) {
+          setServiceTier(snap.serviceTier);
+        }
         
         // Skip to step 4 (time selection)
         setStep(4);
@@ -342,10 +326,6 @@ export default function BookingEngine() {
       setError(validationError);
       return;
     }
-    if (!termsAccepted) {
-      setError("Please accept the Terms & Conditions and 24-hour cancellation policy to continue.");
-      return;
-    }
     if (!pricing?.quoteId || !selectedSlot) {
       setError("Missing quote or time slot.");
       return;
@@ -398,7 +378,6 @@ export default function BookingEngine() {
     return dates;
   };
 
-  // Show loading state when loading quote from URL
   if (quoteLoading) {
     return (
       <div className="min-h-screen bg-bg text-text flex items-center justify-center">
@@ -516,9 +495,92 @@ export default function BookingEngine() {
                     </div>
                   )}
 
+                  {serviceMode === "PPI" && (
+                    <div className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="text-xs font-semibold uppercase tracking-widest text-muted">PPI Add-ons</div>
+                        <div className="grid gap-3">
+                          <label className="flex items-center justify-between p-4 rounded-[10px] bg-surface border border-border cursor-pointer hover:border-primary/50 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="checkbox"
+                                checked={!!pricing.rawAddOns?.ppiDiagnosticScan}
+                                onChange={(e) => updateAddOns({ ppiDiagnosticScan: e.target.checked })}
+                                className="w-5 h-5 rounded border-border text-primary focus:ring-primary bg-bg"
+                              />
+                              <div>
+                                <div className="font-semibold text-sm">Diagnostic Scan & Report</div>
+                                <div className="text-xs text-muted">Full fault code scan & health check</div>
+                              </div>
+                            </div>
+                            <div className="font-bold text-sm text-primary">+$45.00</div>
+                          </label>
+                          <label className="flex items-center justify-between p-4 rounded-[10px] bg-surface border border-border cursor-pointer hover:border-primary/50 transition-colors">
+                            <div className="flex items-center gap-4">
+                              <input
+                                type="checkbox"
+                                checked={!!pricing.rawAddOns?.ppiCompressionTest}
+                                onChange={(e) => updateAddOns({ ppiCompressionTest: e.target.checked })}
+                                className="w-5 h-5 rounded border-border text-primary focus:ring-primary bg-bg"
+                              />
+                              <div>
+                                <div className="font-semibold text-sm">Engine Compression Test</div>
+                                <div className="text-xs text-muted">Relative compression balance check</div>
+                              </div>
+                            </div>
+                            <div className="font-bold text-sm text-primary">+$65.00</div>
+                          </label>
+                          <label className="flex items-center justify-between p-4 rounded-[10px] bg-surface border border-border cursor-pointer hover:border-primary/50 transition-colors">
+                            <div className="flex items-center gap-4">
+                              <input
+                                type="checkbox"
+                                checked={!!pricing.rawAddOns?.ppiHybridBatteryCheck}
+                                onChange={(e) => updateAddOns({ ppiHybridBatteryCheck: e.target.checked })}
+                                className="w-5 h-5 rounded border-border text-primary focus:ring-primary bg-bg"
+                              />
+                              <div>
+                                <div className="font-semibold text-sm">Hybrid/EV Battery Health</div>
+                                <div className="text-xs text-muted">State of health & cell balance</div>
+                              </div>
+                            </div>
+                            <div className="font-bold text-sm text-primary">+$55.00</div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {serviceMode === "SERVICE" && (
-                    <div className="space-y-3">
-                      <div className="text-xs font-semibold uppercase tracking-widest text-muted">Optional Extras</div>
+                    <div className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="text-xs font-semibold uppercase tracking-widest text-muted">Service Level</div>
+                        <div className="grid gap-2">
+                          {[
+                            { id: "OIL_FILTER", label: "Oil & Filter Change", desc: "Starting from $149" },
+                            { id: "BASIC", label: "Basic Service", desc: "Starting from $275" },
+                            { id: "COMPREHENSIVE", label: "Comprehensive", desc: "Starting from $385" },
+                          ].map((t) => (
+                            <button
+                              key={t.id}
+                              onClick={() => {
+                                setServiceTier(t.id);
+                                fetchPricing({ ...pricing?.rawAddOns, serviceTier: t.id });
+                              }}
+                              className={`p-3 rounded-[10px] border text-left transition-all ${
+                                serviceTier === t.id
+                                  ? "bg-surface border-primary ring-1 ring-primary"
+                                  : "bg-surface border-border hover:border-primary/50"
+                              }`}
+                            >
+                              <div className="font-semibold text-sm">{t.label}</div>
+                              <div className="text-xs text-muted">{t.desc}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="text-xs font-semibold uppercase tracking-widest text-muted">Optional Extras</div>
                       <div className="grid gap-3">
                         <label className="flex items-center justify-between p-4 rounded-[10px] bg-surface border border-border cursor-pointer hover:border-primary/50 transition-colors">
                           <div className="flex items-center gap-3">
@@ -552,7 +614,8 @@ export default function BookingEngine() {
                         </label>
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
 
                   <div className="flex gap-3">
                     <button onClick={() => goToStep(2)} className="flex-1 h-12 rounded-[10px] border border-border text-muted hover:text-text hover:border-primary/50 transition-colors">
@@ -615,7 +678,7 @@ export default function BookingEngine() {
                             : "bg-surface border-border hover:border-primary/50"
                         }`}
                       >
-                        {formatNzTime(slot.start)}
+                        {format(new Date(slot.start), "h:mm aa")}
                       </button>
                     ))}
                     {slots.filter(s => s.available).length === 0 && (
@@ -655,7 +718,7 @@ export default function BookingEngine() {
           <StepContainer title="Your Details" subtitle="We'll use these to confirm your booking.">
             <div className="space-y-4">
               <InputField label="Full Name" value={customer.name} onChange={(v) => setCustomer({ ...customer, name: v })} placeholder="John Smith" />
-              <InputField label="Phone" value={customer.phone} onChange={(v) => setCustomer({ ...customer, phone: v })} placeholder="027 123 4567" type="tel" />
+              <InputField label="Phone" value={customer.phone} onChange={(v) => setCustomer({ ...customer, phone: v })} placeholder="021 123 4567" type="tel" />
               <InputField label="Email" value={customer.email} onChange={(v) => setCustomer({ ...customer, email: v })} placeholder="john@example.com" type="email" />
               <InputField label="Address (where we come to you)" value={customer.address} onChange={(v) => setCustomer({ ...customer, address: v })} placeholder="123 Example Street, Ponsonby" />
               <div className="space-y-2">
@@ -685,12 +748,16 @@ export default function BookingEngine() {
           <StepContainer title="Confirm & Pay" subtitle="Review your booking and complete payment.">
             <div className="space-y-6">
               <div className="p-4 rounded-[10px] bg-surface border border-border space-y-3">
-                <SummaryLine label="Service" value={serviceMode === "DIAGNOSTICS" ? "Diagnostics" : serviceMode === "PPI" ? "Pre-Purchase Inspection" : "Service / Repair"} />
-                <SummaryLine label="Vehicle" value={vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model} (${vehicle.plate})` : "—"} />
-                <SummaryLine
-                  label="Date & Time"
-                  value={selectedSlot ? `${formatNzDate(selectedSlot.start)} · ${formatNzTime(selectedSlot.start)}` : "—"}
+                <SummaryLine 
+                  label="Service" 
+                  value={
+                    serviceMode === "DIAGNOSTICS" ? "Diagnostics" : 
+                    serviceMode === "PPI" ? "Pre-Purchase Inspection" : 
+                    `Service (${serviceTier === "OIL_FILTER" ? "Oil & Filter" : serviceTier === "COMPREHENSIVE" ? "Comprehensive" : "Basic"})`
+                  } 
                 />
+                <SummaryLine label="Vehicle" value={vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model} (${vehicle.plate})` : "—"} />
+                <SummaryLine label="Date & Time" value={selectedSlot ? format(new Date(selectedSlot.start), "EEE d MMM, h:mm aa") : "—"} />
                 <SummaryLine label="Location" value={customer.address || "—"} />
                 <SummaryLine label="Contact" value={`${customer.name} · ${customer.phone}`} />
                 <div className="h-px bg-border" />
@@ -707,38 +774,6 @@ export default function BookingEngine() {
                 </div>
               )}
 
-              <div className="p-4 rounded-[10px] bg-surface border border-border">
-                <div className="text-xs font-semibold uppercase tracking-widest text-muted">Before you pay</div>
-                <div className="mt-3 grid gap-2 text-sm">
-                  {[
-                    "Fully insured mobile mechanic",
-                    "Upfront pricing shown before you pay",
-                    "Secure payment processing via Stripe",
-                    "Cancel or reschedule up to 24 hours before your appointment",
-                  ].map((item) => (
-                    <div key={item} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-primary" />
-                      <span className="text-muted">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <label className="flex items-start gap-3 p-4 rounded-[10px] bg-surface border border-border cursor-pointer hover:border-primary/50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="w-5 h-5 mt-0.5 rounded border-border text-primary focus:ring-primary bg-bg"
-                />
-                <span className="text-sm text-muted leading-relaxed">
-                  I agree to the{" "}
-                  <a className="text-primary" href="/terms" target="_blank" rel="noreferrer">Terms & Conditions</a>
-                  {" "}and the{" "}
-                  <a className="text-primary" href="/cancellation-policy" target="_blank" rel="noreferrer">24-hour cancellation policy</a>.
-                </span>
-              </label>
-
               <div className="text-xs text-muted space-y-1">
                 <p>• Payment is processed securely via Stripe.</p>
                 <p>• You can cancel or reschedule up to 24 hours before your appointment.</p>
@@ -751,10 +786,10 @@ export default function BookingEngine() {
                 </button>
                 <button
                   onClick={submitBooking}
-                  disabled={submitting || !termsAccepted}
+                  disabled={submitting}
                   className="flex-1 h-14 rounded-[10px] bg-primary text-primaryText font-bold text-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Secure My Appointment"}
+                  {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Confirm & Secure Booking"}
                 </button>
               </div>
 
@@ -888,14 +923,18 @@ function InputField({
   placeholder: string;
   type?: string;
 }) {
+  const inputMode = type === "email" ? "email" : type === "tel" ? "tel" : type === "number" ? "numeric" : undefined;
+  
   return (
     <div className="space-y-2">
       <label className="text-xs font-semibold uppercase tracking-widest text-muted">{label}</label>
       <input
         type={type}
+        inputMode={inputMode}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        autoComplete={type === "email" ? "email" : type === "tel" ? "tel" : undefined}
         className="w-full h-12 bg-surface border border-border rounded-[10px] px-4 text-sm text-text placeholder:text-muted/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
       />
     </div>
