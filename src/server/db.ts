@@ -261,7 +261,7 @@ export async function dbHealthCheck(): Promise<DbHealthResult> {
   try {
     const { prisma } = await import("@/server/prisma");
 
-    const timeoutMs = Number(process.env.DB_HEALTHCHECK_TIMEOUT_MS || "1200") || 1200;
+    const timeoutMs = Number(process.env.DB_HEALTHCHECK_TIMEOUT_MS || "5000") || 5000;
     await withDbRetries(async () => {
       await Promise.race([
         prisma.$queryRaw`SELECT 1`,
