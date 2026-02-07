@@ -53,7 +53,7 @@ npx tsx seed_comprehensive.ts
 ### **4. Stripe Webhook Setup**
 
 1. Go to Stripe Dashboard → Developers → Webhooks
-2. Add endpoint: `https://mobileautoworksnz.com/api/webhook/stripe`
+2. Add endpoint: `https://www.mobileautoworksnz.com/api/stripe/webhook`
 3. Select event: `checkout.session.completed`
 4. Copy webhook secret to `STRIPE_WEBHOOK_SECRET`
 
